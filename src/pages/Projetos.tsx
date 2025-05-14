@@ -39,6 +39,7 @@ type Projeto = {
 export function Projetos() {
   const [activeFilter, setActiveFilter] = useState('todos');
   const [selectedProject, setSelectedProject] = useState<Projeto | null>(null);
+  const [allProjects, setAllProjects] = useState<Projeto[]>([]);
   const [projects, setProjects] = useState<Projeto[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -69,16 +70,10 @@ export function Projetos() {
   const projetosPorPagina = 9;
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('projetos')
-        .select('*')
-        .order('criado_em', { ascending: false });
-      if (!error) setProjects((data as Projeto[]) || []);
-      setLoading(false);
-    };
-    fetchProjects();
+    setLoadingGlobal(true);
+    fetchTags().then(() => {
+      setLoadingGlobal(false);
+    });
     supabase.auth.getUser().then(({ data }: { data: { user: any } }) => setUser(data.user));
     const { data: listener } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
@@ -88,15 +83,50 @@ export function Projetos() {
     };
   }, []);
 
+  useEffect(() => {
+    if (linguagensOpcoes.length > 0 && categoriasOpcoes.length > 0) {
+      fetchProjetosComTags();
+    }
+    // eslint-disable-next-line
+  }, [linguagensOpcoes, categoriasOpcoes]);
+
+  // Adicionar este useEffect para garantir que ao trocar o filtro, a página volte para 1
+  useEffect(() => {
+    if (paginaAtual !== 1) {
+      setPaginaAtual(1);
+    }
+    // Não atualize os projetos aqui, deixe o outro useEffect cuidar disso
+    // Isso evita que a grid fique vazia ao trocar o filtro estando em outra página
+    // eslint-disable-next-line
+  }, [activeFilter]);
+
+  // No useEffect de filtragem e paginação, só atualize os projetos se a página já estiver correta
+  useEffect(() => {
+    // Filtrar projetos
+    const filtered = activeFilter === 'todos'
+      ? allProjects
+      : allProjects.filter(project => project.categorias?.map(cat => cat.toLowerCase()).includes(activeFilter));
+
+    // Calcular total de páginas com base nos resultados filtrados
+    const novoTotalPaginas = Math.max(1, Math.ceil(filtered.length / projetosPorPagina));
+    setTotalPaginas(novoTotalPaginas);
+
+    // Se a página atual for maior que o novo total de páginas, ajustar para a última página
+    if (paginaAtual > novoTotalPaginas) {
+      setPaginaAtual(novoTotalPaginas);
+    }
+
+    // Paginar
+    const from = (paginaAtual - 1) * projetosPorPagina;
+    const to = from + projetosPorPagina;
+    setProjects(filtered.slice(from, to));
+  }, [allProjects, activeFilter, paginaAtual, projetosPorPagina]);
+
   // Filtro dinâmico de categorias
   const categories = [
     { id: 'todos', label: 'Todos' },
     ...categoriasOpcoes.map(cat => ({ id: cat.nome.toLowerCase(), label: cat.nome }))
   ];
-
-  const filteredProjects = activeFilter === 'todos'
-    ? projects
-    : projects.filter(project => project.categorias?.map(cat => cat.toLowerCase()).includes(activeFilter));
 
   const openProjectDetails = (project: Projeto) => {
     setSelectedProject(project);
@@ -205,14 +235,11 @@ export function Projetos() {
     // Buscar total de projetos para calcular páginas
     const { count } = await supabase.from('projetos').select('*', { count: 'exact', head: true });
     setTotalPaginas(Math.max(1, Math.ceil((count || 0) / projetosPorPagina)));
-    // Buscar projetos paginados
-    const from = (paginaAtual - 1) * projetosPorPagina;
-    const to = from + projetosPorPagina - 1;
+    // Buscar todos os projetos (remover range)
     const { data: projetosData, error } = await supabase
       .from('projetos')
       .select('*')
-      .order('criado_em', { ascending: false })
-      .range(from, to);
+      .order('criado_em', { ascending: false });
     if (error || !projetosData) {
       setProjects([]);
       setLoading(false);
@@ -230,20 +257,9 @@ export function Projetos() {
       };
     });
     setProjects(projetosComTags);
+    setAllProjects(projetosComTags);
     setLoading(false);
   }
-
-  // Carregar tags e projetos sincronizados
-  useEffect(() => {
-    setLoadingGlobal(true);
-    fetchTags().then(() => setLoadingGlobal(false));
-  }, []);
-  useEffect(() => {
-    if (linguagensOpcoes.length > 0 && categoriasOpcoes.length > 0) {
-      fetchProjetosComTags();
-    }
-    // eslint-disable-next-line
-  }, [paginaAtual, linguagensOpcoes, categoriasOpcoes]);
 
   return (
     <div className="py-20">
@@ -283,7 +299,7 @@ export function Projetos() {
           <div className="flex items-center justify-center min-h-screen text-gray-400">Carregando...</div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProjects.map((project) => (
+            {projects.map((project) => (
               <div className="bg-black/60 rounded-2xl overflow-hidden border border-white/10 shadow-lg project-card flex flex-col" key={project.id}>
                 <div className="relative h-56 overflow-hidden">
                   {project.imagem_url && (
