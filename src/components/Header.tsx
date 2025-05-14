@@ -83,10 +83,10 @@ export function Header() {
             ) : (
               <Link 
                 to="/login" 
-                className="inline-flex items-center space-x-2 text-xl font-medium text-blue-500 hover:text-blue-400 transition-colors py-2"
+                className="login-outline-btn"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <LogIn className="w-6 h-6" />
+                <LogIn className="w-5 h-5 mr-2" />
                 <span>Login</span>
               </Link>
             )}
@@ -169,10 +169,10 @@ export function Header() {
             ) : (
               <Link 
                 to="/login" 
-                className="inline-flex items-center space-x-2 text-xl font-medium text-blue-500 hover:text-blue-400 transition-colors py-2"
+                className="login-outline-btn"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <LogIn className="w-6 h-6" />
+                <LogIn className="w-5 h-5 mr-2" />
                 <span>Login</span>
               </Link>
             )}
