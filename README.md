@@ -1,4 +1,4 @@
-# Codepacce - Site Institucional Teste
+# Codepacce - Site Institucional
 
 Este é o repositório do site institucional da Codepacce, uma empresa especializada em desenvolvimento de software sob medida.
 
