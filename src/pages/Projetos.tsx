@@ -301,9 +301,14 @@ export function Projetos() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map((project) => (
               <div className="bg-black/60 rounded-2xl overflow-hidden border border-white/10 shadow-lg project-card flex flex-col" key={project.id}>
-                <div className="relative h-56 overflow-hidden">
+                <div className="relative flex items-center justify-center h-48 bg-black/80 overflow-hidden">
                   {project.imagem_url && (
-                    <img src={project.imagem_url} alt={project.titulo} className="w-full h-full object-cover" />
+                    <img
+                      src={project.imagem_url}
+                      alt={project.titulo}
+                      className="max-h-40 w-auto object-contain mx-auto"
+                      style={{ maxWidth: '100%' }}
+                    />
                   )}
                 </div>
                 <div className="p-6 flex-1 flex flex-col">
