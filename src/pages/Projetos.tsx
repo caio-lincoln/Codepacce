@@ -88,13 +88,10 @@ export function Projetos() {
     };
   }, []);
 
+  // Filtro dinâmico de categorias
   const categories = [
     { id: 'todos', label: 'Todos' },
-    { id: 'ecommerce', label: 'E-commerce' },
-    { id: 'apps', label: 'Apps' },
-    { id: 'web', label: 'Web' },
-    { id: 'enterprise', label: 'Enterprise' },
-    { id: 'saas', label: 'SaaS' },
+    ...categoriasOpcoes.map(cat => ({ id: cat.nome.toLowerCase(), label: cat.nome }))
   ];
 
   const filteredProjects = activeFilter === 'todos'
