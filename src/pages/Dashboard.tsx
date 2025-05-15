@@ -51,7 +51,7 @@ export function Dashboard() {
   // Estados de paginação
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
-  const projetosPorPagina = 10;
+  const projetosPorPagina = 9;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
@@ -65,20 +65,29 @@ export function Dashboard() {
     }
   }, [paginaAtual, linguagensOpcoes, categoriasOpcoes]);
 
+  // Atualizar estatísticas sempre que a lista de projetos mudar
+  useEffect(() => {
+    if (projetos.length === 0) {
+      setStats({ total: 0, ultimo: null });
+      return;
+    }
+    const total = projetos.length;
+    // Encontrar o projeto mais recente
+    const ultimoProjeto = projetos.reduce((maisRecente, atual) => {
+      if (!maisRecente) return atual;
+      return new Date(atual.criado_em) > new Date(maisRecente.criado_em) ? atual : maisRecente;
+    }, null);
+    setStats({ total, ultimo: ultimoProjeto?.criado_em || null });
+  }, [projetos]);
+
   // Buscar projetos ao carregar e após upload
   async function fetchProjetos() {
     setLoadingProjetos(true);
-    // Buscar total de projetos para calcular páginas
-    const { count } = await supabase.from('projetos').select('*', { count: 'exact', head: true });
-    setTotalPaginas(Math.max(1, Math.ceil((count || 0) / projetosPorPagina)));
-    // Buscar projetos paginados
-    const from = (paginaAtual - 1) * projetosPorPagina;
-    const to = from + projetosPorPagina - 1;
+    // Buscar todos os projetos (sem range)
     const { data: projetosData, error } = await supabase
       .from('projetos')
       .select('*')
-      .order('criado_em', { ascending: false })
-      .range(from, to);
+      .order('criado_em', { ascending: false });
     if (error || !projetosData) {
       setProjetos([]);
       setLoadingProjetos(false);
@@ -97,6 +106,7 @@ export function Dashboard() {
       };
     });
     setProjetos(projetosComTags);
+    setTotalPaginas(Math.max(1, Math.ceil(projetosComTags.length / projetosPorPagina)));
     setLoadingProjetos(false);
   }
 
@@ -417,15 +427,6 @@ export function Dashboard() {
     setModalProjeto(null);
   }
 
-  // Controles de paginação na renderização
-  <div className="flex justify-center mt-8 gap-2">
-    <button onClick={() => setPaginaAtual(p => Math.max(1, p - 1))} disabled={paginaAtual === 1} className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50">Anterior</button>
-    {[...Array(totalPaginas)].map((_, idx) => (
-      <button key={idx} onClick={() => setPaginaAtual(idx + 1)} className={`px-3 py-1 rounded ${paginaAtual === idx + 1 ? 'bg-blue-500 text-white' : 'bg-gray-700 text-white'}`}>{idx + 1}</button>
-    ))}
-    <button onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))} disabled={paginaAtual === totalPaginas} className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50">Próxima</button>
-  </div>
-
   return (
     loadingGlobal ? (
       <div className="flex items-center justify-center min-h-screen text-gray-400">Carregando...</div>
@@ -549,55 +550,68 @@ export function Dashboard() {
                   {uploading ? 'Enviando...' : 'Adicionar Projeto'}
                 </button>
               </form>
-              {/* Listagem de projetos */}
+              {/* Listagem de projetos com paginação e imagens centralizadas/redimensionadas */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {loadingProjetos ? (
                   <div className="col-span-full text-center text-gray-400">Carregando projetos...</div>
                 ) : filteredProjects.length === 0 ? (
                   <div className="col-span-full text-center text-gray-400">Nenhum projeto cadastrado ainda.</div>
                 ) : (
-                  filteredProjects.map((proj) => (
-                    <div key={proj.id} className="bg-black/60 rounded-2xl overflow-hidden border border-white/10 shadow-lg project-card flex flex-col">
-                      <div className="relative h-56 overflow-hidden">
-                        {proj.imagem_url && (
-                          <img src={proj.imagem_url} alt={proj.titulo} className="w-full h-full object-cover" />
-                        )}
-                      </div>
-                      <div className="p-6 flex-1 flex flex-col">
-                        <h3 className="text-2xl font-bold mb-2">{proj.titulo}</h3>
-                        <p className="text-gray-300 mb-4 flex-1">{proj.descricao}</p>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {proj.linguagens && proj.linguagens.length > 0 ? (
-                            proj.linguagens.map((lang: string, idx: number) => (
-                              <span key={idx} className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm">{lang}</span>
-                            ))
-                          ) : (
-                            <span className="text-gray-500 text-xs">Nenhuma linguagem</span>
+                  filteredProjects
+                    .slice((paginaAtual - 1) * projetosPorPagina, paginaAtual * projetosPorPagina)
+                    .map((proj) => (
+                      <div key={proj.id} className="bg-black/60 rounded-2xl overflow-hidden border border-white/10 shadow-lg project-card flex flex-col">
+                        <div className="relative flex items-center justify-center h-48 bg-black/80 overflow-hidden">
+                          {proj.imagem_url && (
+                            <img
+                              src={proj.imagem_url}
+                              alt={proj.titulo}
+                              className="max-h-40 w-auto object-contain mx-auto"
+                              style={{ maxWidth: '100%' }}
+                            />
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {proj.categorias && proj.categorias.length > 0 ? (
-                            proj.categorias.map((cat: string, idx: number) => (
-                              <span key={idx} className="bg-blue-900/20 text-blue-400 px-3 py-1 rounded-full text-sm">{cat}</span>
-                            ))
-                          ) : (
-                            <span className="text-gray-500 text-xs">Nenhuma categoria</span>
+                        <div className="p-6 flex-1 flex flex-col">
+                          <h3 className="text-2xl font-bold mb-2">{proj.titulo}</h3>
+                          <p className="text-gray-300 mb-4 flex-1">{proj.descricao}</p>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {proj.linguagens && proj.linguagens.length > 0 ? (
+                              proj.linguagens.map((lang: string, idx: number) => (
+                                <span key={idx} className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm">{lang}</span>
+                              ))
+                            ) : (
+                              <span className="text-gray-500 text-xs">Nenhuma linguagem</span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {proj.categorias && proj.categorias.length > 0 ? (
+                              proj.categorias.map((cat: string, idx: number) => (
+                                <span key={idx} className="bg-blue-900/20 text-blue-400 px-3 py-1 rounded-full text-sm">{cat}</span>
+                              ))
+                            ) : (
+                              <span className="text-gray-500 text-xs">Nenhuma categoria</span>
+                            )}
+                          </div>
+                          {proj.link && (
+                            <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline block mb-2">Ver Projeto</a>
                           )}
-                        </div>
-                        {proj.link && (
-                          <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline block mb-2">Ver Projeto</a>
-                        )}
-                        <p className="text-xs text-gray-500 mt-auto">Criado em: {new Date(proj.criado_em).toLocaleDateString('pt-BR')}</p>
-                        {user && (
+                          <p className="text-xs text-gray-500 mt-auto">Criado em: {new Date(proj.criado_em).toLocaleDateString('pt-BR')}</p>
                           <div className="flex gap-2 mt-4">
                             <button className="px-3 py-1 bg-yellow-500 text-white rounded" onClick={() => openModalProjeto(proj)}>Editar</button>
                             <button className="px-3 py-1 bg-red-500 text-white rounded" onClick={() => handleRemoverProjeto(proj.id)}>Remover</button>
                           </div>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    ))
                 )}
+              </div>
+              {/* Controles de paginação */}
+              <div className="flex justify-center mt-8 gap-2">
+                <button onClick={() => setPaginaAtual(p => Math.max(1, p - 1))} disabled={paginaAtual === 1} className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50">Anterior</button>
+                {[...Array(totalPaginas)].map((_, idx) => (
+                  <button key={idx} onClick={() => setPaginaAtual(idx + 1)} className={`px-3 py-1 rounded ${paginaAtual === idx + 1 ? 'bg-blue-500 text-white' : 'bg-gray-700 text-white'}`}>{idx + 1}</button>
+                ))}
+                <button onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))} disabled={paginaAtual === totalPaginas} className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50">Próxima</button>
               </div>
             </>
           )}
