@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { Link } from 'react-router-dom';
 
 export function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -142,9 +143,9 @@ export function Login() {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-blue-500 hover:text-blue-400 transition-colors">
+                <Link to="/reset" className="font-medium text-blue-500 hover:text-blue-400 transition-colors">
                   Esqueceu a senha?
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -165,13 +166,6 @@ export function Login() {
               </span>
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
-
-            <p className="mt-2 text-center text-sm text-gray-400">
-              Não tem uma conta?{' '}
-              <a href="#" className="font-medium text-blue-500 hover:text-blue-400 transition-colors">
-                Criar conta
-              </a>
-            </p>
           </form>
         </div>
       </div>

@@ -17,6 +17,7 @@ import { ChatBot } from './components/ChatBot';
 import { Tecnologias } from './pages/Tecnologias';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Dashboard } from './pages/Dashboard';
+import Reset from './pages/Reset';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/portfolio" element={<Projetos />} />
           <Route path="/sobre" element={<Sobre />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset" element={<Reset />} />
           <Route path="/produtos" element={<Produtos />} />
           <Route path="/termos" element={<Termos />} />
           <Route path="/privacidade" element={<Privacidade />} />
