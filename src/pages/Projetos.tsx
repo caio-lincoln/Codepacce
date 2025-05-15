@@ -122,6 +122,20 @@ export function Projetos() {
     setProjects(filtered.slice(from, to));
   }, [allProjects, activeFilter, paginaAtual, projetosPorPagina]);
 
+  // Adicionar useEffect para scroll ao topo ao trocar de página
+  useEffect(() => {
+    const filtros = document.getElementById('projetos-filtros');
+    const header = document.querySelector('header');
+    const headerHeight = header ? header.offsetHeight : 80; // ajuste se necessário
+
+    if (filtros) {
+      const y = filtros.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [paginaAtual]);
+
   // Filtro dinâmico de categorias
   const categories = [
     { id: 'todos', label: 'Todos' },
@@ -275,7 +289,7 @@ export function Projetos() {
       </section>
 
       {/* Filters */}
-      <section className="container mx-auto px-4 mb-12">
+      <section id="projetos-filtros" className="container mx-auto px-4 mb-12">
         <div className="flex flex-wrap justify-center gap-4">
           {categories.map(category => (
             <button
@@ -294,7 +308,7 @@ export function Projetos() {
       </section>
 
       {/* Projects Grid */}
-      <section className="container mx-auto px-4">
+      <section id="projetos-grid" className="container mx-auto px-4">
         {loadingGlobal ? (
           <div className="flex items-center justify-center min-h-screen text-gray-400">Carregando...</div>
         ) : (
