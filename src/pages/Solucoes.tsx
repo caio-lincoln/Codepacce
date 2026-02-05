@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   Globe,
   Smartphone,
@@ -10,7 +11,9 @@ import {
   BarChart,
   Settings,
   Users,
-  Zap
+  Zap,
+  ArrowRight,
+  CheckCircle2
 } from 'lucide-react';
 
 export function Solucoes() {
@@ -18,27 +21,23 @@ export function Solucoes() {
     {
       icon: Globe,
       title: "Desenvolvimento Web",
-      description: "Criamos aplicações web modernas e responsivas que proporcionam a melhor experiência aos usuários.",
+      description: "Aplicações web modernas, escaláveis e otimizadas para conversão.",
       features: [
         "Single Page Applications (SPA)",
         "Progressive Web Apps (PWA)",
         "Portais Corporativos",
-        "E-commerce",
-        "Sistemas de Gestão",
-        "Integrações com APIs"
+        "E-commerce High-End"
       ],
-      technologies: ["React", "Next.js", "Vue.js", "Node.js", "TypeScript"]
+      technologies: ["React", "Next.js", "Node.js", "TypeScript"]
     },
     {
       icon: Smartphone,
       title: "Desenvolvimento Mobile",
-      description: "Desenvolvemos aplicativos nativos e multiplataforma que engajam seus usuários.",
+      description: "Experiências nativas e multiplataforma que encantam usuários.",
       features: [
         "Apps iOS e Android",
-        "Apps Multiplataforma",
-        "UI/UX Mobile",
-        "Integração com APIs",
-        "Push Notifications",
+        "Design System Mobile",
+        "Integração com Hardware",
         "Offline First"
       ],
       technologies: ["React Native", "Flutter", "Swift", "Kotlin"]
@@ -46,196 +45,197 @@ export function Solucoes() {
     {
       icon: Cloud,
       title: "Cloud & DevOps",
-      description: "Implementamos soluções em nuvem escaláveis e processos de desenvolvimento ágeis.",
+      description: "Infraestrutura robusta para garantir disponibilidade total.",
       features: [
-        "Arquitetura Cloud",
-        "CI/CD Pipeline",
+        "Arquitetura Serverless",
+        "CI/CD Pipelines",
         "Containerização",
-        "Monitoramento",
-        "Segurança",
-        "Backup"
+        "Auto-scaling"
       ],
-      technologies: ["AWS", "Azure", "Docker", "Kubernetes", "Jenkins"]
+      technologies: ["AWS", "Azure", "Docker", "Kubernetes"]
     },
     {
       icon: Database,
-      title: "Banco de Dados",
-      description: "Projetamos e implementamos soluções de dados eficientes e escaláveis.",
+      title: "Engenharia de Dados",
+      description: "Arquiteturas de dados preparadas para alto volume e velocidade.",
       features: [
         "Modelagem de Dados",
-        "Otimização",
-        "Migração",
-        "Replicação",
-        "Backup",
-        "Monitoramento"
+        "Data Warehousing",
+        "Migrações Complexas",
+        "Real-time Analytics"
       ],
-      technologies: ["PostgreSQL", "MongoDB", "Redis", "MySQL"]
+      technologies: ["PostgreSQL", "MongoDB", "Redis", "Kafka"]
     },
     {
       icon: Shield,
-      title: "Segurança",
-      description: "Implementamos as melhores práticas de segurança em todas as soluções.",
+      title: "Cibersegurança",
+      description: "Proteção avançada para seus ativos digitais mais valiosos.",
       features: [
-        "Autenticação",
-        "Autorização",
-        "Criptografia",
+        "Auditoria de Código",
         "Testes de Penetração",
-        "Compliance",
-        "Auditoria"
+        "Compliance (LGPD/GDPR)",
+        "Criptografia E2E"
       ],
-      technologies: ["OAuth", "JWT", "SSL/TLS", "WAF"]
+      technologies: ["OAuth 2.0", "JWT", "WAF", "Zero Trust"]
     },
     {
       icon: BarChart,
       title: "Business Intelligence",
-      description: "Transformamos dados em insights acionáveis para seu negócio.",
+      description: "Transforme dados brutos em decisões estratégicas precisas.",
       features: [
-        "Dashboards",
-        "Relatórios",
-        "ETL",
-        "Data Warehouse",
-        "Analytics",
-        "Visualização"
+        "Dashboards Interativos",
+        "ETL Pipelines",
+        "Relatórios Automatizados",
+        "Predictive Analytics"
       ],
-      technologies: ["Power BI", "Tableau", "Python", "R"]
+      technologies: ["Power BI", "Python", "Tableau", "Pandas"]
     }
   ];
 
   return (
-    <div className="py-20">
+    <div className="pt-32 pb-20 overflow-hidden">
+      {/* Background Elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
+        <div className="absolute top-40 left-20 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
+        <div className="absolute bottom-40 right-20 w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[120px] -z-10" />
+      </div>
+
       {/* Hero */}
-      <section className="container mx-auto px-4 mb-20">
-        <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-5xl font-bold mb-6">Nossas Soluções</h1>
-          <p className="text-gray-400 text-lg">
-            Oferecemos um conjunto completo de serviços de desenvolvimento de software
-            para atender às necessidades específicas do seu negócio.
-          </p>
+      <section className="container mx-auto px-4 mb-32 relative z-10">
+        <div className="text-center max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-400 text-sm mb-6 backdrop-blur-sm tracking-wide">
+              Expertise Técnica
+            </span>
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 font-display tracking-tight text-white">
+              Soluções de ponta a ponta para <br />
+              <span className="text-blue-500">desafios complexos</span>
+            </h1>
+            <p className="text-gray-400 text-xl font-light leading-relaxed max-w-2xl mx-auto font-sans">
+              Nossa stack tecnológica é selecionada para garantir performance, segurança e escalabilidade para o seu negócio.
+            </p>
+          </motion.div>
         </div>
       </section>
 
       {/* Solutions Grid */}
-      <section className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <section className="container mx-auto px-4 mb-32 relative z-10">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {solutions.map((solution, index) => (
-            <div 
+            <motion.div 
               key={index} 
-              className="group bg-black/50 p-8 rounded-lg backdrop-blur-sm border border-white/10 
-                         transition-all duration-500 hover:scale-105 hover:bg-blue-900/20
-                         hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="group bg-white/5 p-8 rounded-[2rem] backdrop-blur-sm border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all duration-300 flex flex-col"
             >
-              <div className="relative">
-                <solution.icon className="text-blue-500 w-12 h-12 mb-6 transition-transform duration-500 
-                                       group-hover:scale-110 group-hover:rotate-12" />
-                <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl opacity-0 
-                              group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-8 text-gray-300 group-hover:text-blue-400 group-hover:border-blue-500/30 transition-all duration-300 group-hover:scale-110">
+                <solution.icon className="w-7 h-7" />
               </div>
               
-              <h3 className="text-xl font-bold mb-4 transition-colors duration-300 
-                           group-hover:text-blue-400">{solution.title}</h3>
+              <h3 className="text-2xl font-bold mb-4 font-display text-white group-hover:text-blue-400 transition-colors">{solution.title}</h3>
+              <p className="text-gray-400 mb-8 font-light leading-relaxed font-sans">{solution.description}</p>
               
-              <p className="text-gray-400 mb-6 transition-colors duration-300 
-                          group-hover:text-gray-300">{solution.description}</p>
-              
-              <div className="mb-6">
-                <h4 className="font-semibold mb-3 transition-colors duration-300 
-                             group-hover:text-blue-400">Recursos:</h4>
-                <ul className="space-y-2">
+              <div className="mt-auto">
+                <div className="mb-6 space-y-3">
                   {solution.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-2 transition-transform duration-300 
-                                           hover:translate-x-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full transition-all duration-300 
-                                    group-hover:scale-150 group-hover:bg-blue-400" />
-                      <span className="text-gray-400 transition-colors duration-300 
-                                     group-hover:text-gray-300">{feature}</span>
-                    </li>
+                    <div key={idx} className="flex items-start gap-3 text-sm text-gray-400 group-hover:text-gray-300 transition-colors font-sans">
+                      <CheckCircle2 className="w-4 h-4 text-blue-500/50 mt-0.5 shrink-0" />
+                      <span>{feature}</span>
+                    </div>
                   ))}
-                </ul>
-              </div>
+                </div>
 
-              <div>
-                <h4 className="font-semibold mb-3 transition-colors duration-300 
-                             group-hover:text-blue-400">Tecnologias:</h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="pt-6 border-t border-white/10 flex flex-wrap gap-2">
                   {solution.technologies.map((tech, idx) => (
                     <span 
                       key={idx} 
-                      className="px-3 py-1 bg-blue-500/10 rounded-full text-blue-400 text-sm
-                               transition-all duration-300 hover:scale-110 hover:bg-blue-500/20
-                               hover:text-blue-300"
+                      className="px-3 py-1 bg-white/5 rounded-full text-xs text-gray-400 border border-white/5"
                     >
                       {tech}
                     </span>
                   ))}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Process Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Nosso Processo</h2>
-          <p className="text-gray-400">Como transformamos suas ideias em realidade</p>
+      {/* Process Section - Refined */}
+      <section className="container mx-auto px-4 mb-32 relative z-10">
+        <div className="text-center mb-20">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl font-bold mb-4 font-display text-white"
+          >
+            Metodologia Ágil
+          </motion.h2>
+          <p className="text-gray-400 font-sans">Como transformamos complexidade em simplicidade</p>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-8">
-          <div className="text-center transform transition-all duration-500 hover:scale-105">
-            <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4
-                          transition-all duration-500 hover:bg-blue-500/20 group">
-              <Users className="w-8 h-8 text-blue-500 transition-transform duration-500 group-hover:scale-110" />
-            </div>
-            <h3 className="font-bold mb-2">1. Discovery</h3>
-            <p className="text-gray-400">Entendemos suas necessidades e objetivos</p>
-          </div>
-          
-          <div className="text-center transform transition-all duration-500 hover:scale-105">
-            <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4
-                          transition-all duration-500 hover:bg-blue-500/20 group">
-              <Code className="w-8 h-8 text-blue-500 transition-transform duration-500 group-hover:scale-110" />
-            </div>
-            <h3 className="font-bold mb-2">2. Desenvolvimento</h3>
-            <p className="text-gray-400">Construímos sua solução com as melhores práticas</p>
-          </div>
+        <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto relative">
+          {/* Connecting Line (Desktop) */}
+          <div className="hidden md:block absolute top-12 left-0 w-full h-px bg-blue-900/30" />
 
-          <div className="text-center transform transition-all duration-500 hover:scale-105">
-            <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4
-                          transition-all duration-500 hover:bg-blue-500/20 group">
-              <Settings className="w-8 h-8 text-blue-500 transition-transform duration-500 group-hover:scale-110" />
-            </div>
-            <h3 className="font-bold mb-2">3. Testes</h3>
-            <p className="text-gray-400">Garantimos qualidade e performance</p>
-          </div>
-
-          <div className="text-center transform transition-all duration-500 hover:scale-105">
-            <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4
-                          transition-all duration-500 hover:bg-blue-500/20 group">
-              <Zap className="w-8 h-8 text-blue-500 transition-transform duration-500 group-hover:scale-110" />
-            </div>
-            <h3 className="font-bold mb-2">4. Deploy</h3>
-            <p className="text-gray-400">Entregamos e mantemos sua solução</p>
-          </div>
+          {[
+            { icon: Users, title: "Discovery", desc: "Imersão no negócio" },
+            { icon: Code, title: "Build", desc: "Desenvolvimento iterativo" },
+            { icon: Settings, title: "Test", desc: "QA rigoroso" },
+            { icon: Zap, title: "Deploy", desc: "Entrega contínua" }
+          ].map((step, index) => (
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="text-center relative z-10 group"
+            >
+              <div className="w-24 h-24 mx-auto bg-[#0a0a0a] rounded-full border border-white/10 flex items-center justify-center mb-6 group-hover:border-blue-500/30 group-hover:shadow-[0_0_30px_-10px_rgba(59,130,246,0.2)] transition-all duration-300">
+                <step.icon className="w-8 h-8 text-gray-400 group-hover:text-blue-400 transition-colors" />
+              </div>
+              <h3 className="font-bold mb-2 text-white font-display text-xl">{step.title}</h3>
+              <p className="text-gray-400 text-sm font-sans">{step.desc}</p>
+            </motion.div>
+          ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="container mx-auto px-4">
-        <div className="bg-gradient-to-r from-blue-600/20 to-blue-400/5 p-12 rounded-2xl backdrop-blur-sm border border-blue-500/20 text-center
-                      transform transition-all duration-500 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/10">
-          <h2 className="text-4xl font-bold mb-4">Vamos Construir Algo Incrível?</h2>
-          <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
-            Estamos prontos para transformar sua ideia em realidade.
-          </p>
-          <Link 
-            to="/contato" 
-            className="inline-flex items-center px-8 py-4 bg-blue-500 hover:bg-blue-600 rounded-full text-white
-                     transition-all duration-300 transform hover:scale-110 hover:shadow-lg hover:shadow-blue-500/50"
-          >
-            Solicitar Orçamento
-          </Link>
-        </div>
+      <section className="container mx-auto px-4 relative z-10">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="relative rounded-[2.5rem] overflow-hidden border border-white/10 bg-white/5 p-12 md:p-20 text-center group"
+        >
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[300px] bg-blue-500/10 blur-[100px] rounded-full -mt-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          
+          <div className="relative z-10 max-w-3xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 font-display text-white">
+              Pronto para escalar sua tecnologia?
+            </h2>
+            <p className="text-gray-400 text-lg mb-10 font-light leading-relaxed font-sans">
+              Agende uma consultoria gratuita com nossos especialistas e descubra o melhor caminho para o seu projeto.
+            </p>
+            <Link 
+              to="/contato" 
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-black font-medium hover:scale-105 transition-all duration-300 group"
+            >
+              <span className="font-display">Falar com Especialista</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </motion.div>
       </section>
     </div>
   );

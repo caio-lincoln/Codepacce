@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingBag,
   Smartphone,
@@ -21,7 +22,8 @@ import {
   Shield,
   Zap,
   BarChart,
-  Cpu
+  Cpu,
+  Search
 } from 'lucide-react';
 
 type Projeto = {
@@ -90,17 +92,13 @@ export function Projetos() {
     // eslint-disable-next-line
   }, [linguagensOpcoes, categoriasOpcoes]);
 
-  // Adicionar este useEffect para garantir que ao trocar o filtro, a página volte para 1
   useEffect(() => {
     if (paginaAtual !== 1) {
       setPaginaAtual(1);
     }
-    // Não atualize os projetos aqui, deixe o outro useEffect cuidar disso
-    // Isso evita que a grid fique vazia ao trocar o filtro estando em outra página
     // eslint-disable-next-line
   }, [activeFilter]);
 
-  // No useEffect de filtragem e paginação, só atualize os projetos se a página já estiver correta
   useEffect(() => {
     // Filtrar projetos
     const filtered = activeFilter === 'todos'
@@ -122,11 +120,10 @@ export function Projetos() {
     setProjects(filtered.slice(from, to));
   }, [allProjects, activeFilter, paginaAtual, projetosPorPagina]);
 
-  // Adicionar useEffect para scroll ao topo ao trocar de página
   useEffect(() => {
     const filtros = document.getElementById('projetos-filtros');
     const header = document.querySelector('header');
-    const headerHeight = header ? header.offsetHeight : 80; // ajuste se necessário
+    const headerHeight = header ? header.offsetHeight : 80;
 
     if (filtros) {
       const y = filtros.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
@@ -136,7 +133,6 @@ export function Projetos() {
     }
   }, [paginaAtual]);
 
-  // Filtro dinâmico de categorias
   const categories = [
     { id: 'todos', label: 'Todos' },
     ...categoriasOpcoes.map(cat => ({ id: cat.nome.toLowerCase(), label: cat.nome }))
@@ -152,90 +148,6 @@ export function Projetos() {
     document.body.style.overflow = 'unset';
   };
 
-  function handleEdit(project: Projeto) {
-    setEditId(project.id);
-    setEditProjeto({
-      titulo: project.titulo,
-      descricao: project.descricao,
-      imagem_url: project.imagem_url || '',
-      link: project.link || ''
-    });
-    setEditError(null);
-  }
-
-  function handleCancelEdit() {
-    setEditId(null);
-    setEditProjeto({ titulo: '', descricao: '', imagem_url: '', link: '' });
-    setEditError(null);
-  }
-
-  async function handleSaveEdit(id: string) {
-    setEditLoading(true);
-    setEditError(null);
-    if (!editProjeto.titulo || !editProjeto.descricao) {
-      setEditError('Título e descrição são obrigatórios.');
-      setEditLoading(false);
-      return;
-    }
-    const { error } = await supabase.from('projetos').update(editProjeto).eq('id', id);
-    setEditLoading(false);
-    if (error) {
-      setEditError('Erro ao salvar alterações.');
-    } else {
-      setProjects(projects.map(p => p.id === id ? { ...p, ...editProjeto } : p));
-      setEditId(null);
-      setEditProjeto({ titulo: '', descricao: '', imagem_url: '', link: '' });
-    }
-  }
-
-  async function handleDelete(id: string) {
-    if (!window.confirm('Tem certeza que deseja remover este projeto?')) return;
-    const { error } = await supabase.from('projetos').delete().eq('id', id);
-    if (error) {
-      alert('Erro ao remover projeto.');
-    } else {
-      setProjects(projects.filter(p => p.id !== id));
-      if (selectedProject && selectedProject.id === id) {
-        closeProjectDetails();
-      }
-    }
-  }
-
-  async function handleAddProjeto(e: React.FormEvent) {
-    e.preventDefault();
-    setAddLoading(true);
-    setAddError(null);
-    if (!novoProjeto.titulo || !novoProjeto.descricao) {
-      setAddError('Título e descrição são obrigatórios.');
-      setAddLoading(false);
-      return;
-    }
-    const { data, error } = await supabase.from('projetos').insert({
-      ...novoProjeto,
-      criado_por: user.id
-    }).select('id');
-    if (error || !data || !data[0]?.id) {
-      setAddError('Erro ao adicionar projeto.');
-      setAddLoading(false);
-      return;
-    }
-    const projetoId = data[0].id;
-    const linguagensIds = linguagensOpcoes.filter(l => linguagensSelecionadas.includes(l.nome)).map(l => l.id);
-    for (const linguagem_id of linguagensIds) {
-      await supabase.from('projeto_linguagem').insert({ projeto_id: projetoId, linguagem_id });
-    }
-    const categoriasIds = categoriasOpcoes.filter(c => categoriasSelecionadas.includes(c.nome)).map(c => c.id);
-    for (const categoria_id of categoriasIds) {
-      await supabase.from('projeto_categoria').insert({ projeto_id: projetoId, categoria_id });
-    }
-    setAddLoading(false);
-    setNovoProjeto({ titulo: '', descricao: '', imagem_url: '', link: '' });
-    setLinguagensSelecionadas([]);
-    setCategoriasSelecionadas([]);
-    fetchProjetosComTags();
-  }
-
-  // Função para buscar opções de tags
   async function fetchTags() {
     const { data: langs } = await supabase.from('linguagens').select('id, nome').order('nome');
     const { data: cats } = await supabase.from('categorias').select('id, nome').order('nome');
@@ -243,24 +155,25 @@ export function Projetos() {
     setCategoriasOpcoes(cats || []);
   }
 
-  // Função para buscar projetos + relacionamentos
   async function fetchProjetosComTags() {
     setLoading(true);
-    // Buscar total de projetos para calcular páginas
     const { count } = await supabase.from('projetos').select('*', { count: 'exact', head: true });
     setTotalPaginas(Math.max(1, Math.ceil((count || 0) / projetosPorPagina)));
-    // Buscar todos os projetos (remover range)
+    
     const { data: projetosData, error } = await supabase
       .from('projetos')
       .select('*')
       .order('criado_em', { ascending: false });
+      
     if (error || !projetosData) {
       setProjects([]);
       setLoading(false);
       return;
     }
+    
     const { data: relLinguagens } = await supabase.from('projeto_linguagem').select('projeto_id, linguagem_id');
     const { data: relCategorias } = await supabase.from('projeto_categoria').select('projeto_id, categoria_id');
+    
     const projetosComTags = projetosData.map(proj => {
       const linguagensIds = relLinguagens?.filter(r => r.projeto_id === proj.id).map(r => r.linguagem_id) || [];
       const categoriasIds = relCategorias?.filter(r => r.projeto_id === proj.id).map(r => r.categoria_id) || [];
@@ -270,164 +183,303 @@ export function Projetos() {
         categorias: categoriasOpcoes.filter(c => categoriasIds.includes(c.id)).map(c => c.nome),
       };
     });
+    
     setProjects(projetosComTags);
     setAllProjects(projetosComTags);
     setLoading(false);
   }
 
   return (
-    <div className="py-20">
+    <div className="pt-32 pb-20 overflow-hidden min-h-screen">
+      {/* Background Elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
+        <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] -z-10" />
+      </div>
+
       {/* Hero */}
-      <section className="container mx-auto px-4 mb-20">
-        <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-5xl font-bold mb-6">Nossos Projetos</h1>
-          <p className="text-gray-400 text-lg">
-            Conheça alguns dos projetos que desenvolvemos e como ajudamos nossos clientes
-            a alcançarem seus objetivos através da tecnologia.
-          </p>
+      <section className="container mx-auto px-4 mb-20 relative z-10">
+        <div className="text-center max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-400 text-sm mb-6 backdrop-blur-sm tracking-wide">
+              Cases
+            </span>
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 font-display tracking-tight text-white">
+              Nossas <span className="text-blue-500">Obras Primas</span>
+            </h1>
+            <p className="text-gray-400 text-xl font-light leading-relaxed max-w-2xl mx-auto font-sans">
+              Explore nossa galeria de projetos e descubra como transformamos desafios complexos em soluções digitais elegantes.
+            </p>
+          </motion.div>
         </div>
       </section>
 
       {/* Filters */}
-      <section id="projetos-filtros" className="container mx-auto px-4 mb-12">
-        <div className="flex flex-wrap justify-center gap-4">
+      <section id="projetos-filtros" className="container mx-auto px-4 mb-16 relative z-10">
+        <div className="flex flex-wrap justify-center gap-3">
           {categories.map(category => (
-            <button
+            <motion.button
               key={category.id}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setActiveFilter(category.id)}
-              className={`filter-button px-6 py-2 rounded-full ${
+              className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border ${
                 activeFilter === category.id
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-black/50 text-gray-400 hover:bg-blue-500/10 hover:text-blue-400'
+                  ? 'bg-blue-500 border-blue-500 text-white shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]'
+                  : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/20 hover:text-white'
               }`}
             >
               {category.label}
-            </button>
+            </motion.button>
           ))}
         </div>
       </section>
 
       {/* Projects Grid */}
-      <section id="projetos-grid" className="container mx-auto px-4">
+      <section id="projetos-grid" className="container mx-auto px-4 relative z-10">
         {loadingGlobal ? (
-          <div className="flex items-center justify-center min-h-screen text-gray-400">Carregando...</div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project) => (
-              <div className="bg-black/60 rounded-2xl overflow-hidden border border-white/10 shadow-lg project-card flex flex-col" key={project.id}>
-                <div className="relative flex items-center justify-center h-48 bg-black/80 overflow-hidden">
-                  {project.imagem_url && (
-                    <img
-                      src={project.imagem_url}
-                      alt={project.titulo}
-                      className="max-h-40 w-auto object-contain mx-auto"
-                      style={{ maxWidth: '100%' }}
-                    />
-                  )}
-                </div>
-                <div className="p-6 flex-1 flex flex-col">
-                  <h3 className="text-2xl font-bold mb-2">{project.titulo}</h3>
-                  <p className="text-gray-300 mb-4 flex-1">{project.descricao}</p>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {project.linguagens && project.linguagens.length > 0 ? (
-                      project.linguagens.map((lang: string, idx: number) => (
-                        <span key={idx} className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm">{lang}</span>
-                      ))
-                    ) : (
-                      <span className="text-gray-500 text-xs">Nenhuma linguagem</span>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {project.categorias && project.categorias.length > 0 ? (
-                      project.categorias.map((cat: string, idx: number) => (
-                        <span key={idx} className="bg-blue-900/20 text-blue-400 px-3 py-1 rounded-full text-sm">{cat}</span>
-                      ))
-                    ) : (
-                      <span className="text-gray-500 text-xs">Nenhuma categoria</span>
-                    )}
-                  </div>
-                  {project.link && (
-                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline block mb-2">Ver Projeto</a>
-                  )}
-                  <p className="text-xs text-gray-500 mt-auto">Criado em: {new Date(project.criado_em).toLocaleDateString('pt-BR')}</p>
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
           </div>
+        ) : (
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <AnimatePresence mode='popLayout'>
+                {projects.map((project, index) => (
+                  <motion.div
+                    layout
+                    key={project.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    onClick={() => openProjectDetails(project)}
+                    className="group cursor-pointer rounded-[2rem] bg-white/5 border border-white/10 overflow-hidden hover:border-white/20 hover:bg-white/10 transition-all duration-300 flex flex-col h-full"
+                  >
+                    {/* Image Container */}
+                    <div className="relative h-60 overflow-hidden bg-black/20 p-8 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-60" />
+                      {project.imagem_url ? (
+                        <motion.img
+                          whileHover={{ scale: 1.05 }}
+                          transition={{ duration: 0.5 }}
+                          src={project.imagem_url}
+                          alt={project.titulo}
+                          className="relative z-10 max-h-full max-w-full object-contain drop-shadow-2xl"
+                        />
+                      ) : (
+                        <Code className="w-16 h-16 text-gray-600" />
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-8 flex-1 flex flex-col">
+                      <div className="flex items-center gap-2 mb-4 flex-wrap">
+                        {project.categorias?.slice(0, 2).map((cat, idx) => (
+                          <span key={idx} className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                            {cat}
+                          </span>
+                        ))}
+                      </div>
+
+                      <h3 className="text-2xl font-bold text-white mb-3 font-display group-hover:text-blue-400 transition-colors">
+                        {project.titulo}
+                      </h3>
+                      
+                      <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3 flex-1 font-sans">
+                        {project.descricao}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-6 border-t border-white/10 mt-auto">
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <Calendar className="w-4 h-4" />
+                          {new Date(project.criado_em).toLocaleDateString('pt-BR')}
+                        </div>
+                        <span className="flex items-center gap-2 text-sm font-medium text-white group-hover:translate-x-1 transition-transform">
+                          Ver Detalhes
+                          <ArrowRight className="w-4 h-4" />
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* Pagination */}
+            {totalPaginas > 1 && (
+              <div className="flex justify-center mt-16 gap-3">
+                <button 
+                  onClick={() => setPaginaAtual(p => Math.max(1, p - 1))} 
+                  disabled={paginaAtual === 1} 
+                  className="px-6 py-3 rounded-full bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-all font-display"
+                >
+                  Anterior
+                </button>
+                <div className="flex gap-2">
+                  {[...Array(totalPaginas)].map((_, idx) => (
+                    <button 
+                      key={idx} 
+                      onClick={() => setPaginaAtual(idx + 1)} 
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-display transition-all ${
+                        paginaAtual === idx + 1 
+                          ? 'bg-blue-500 text-white shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]' 
+                          : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      {idx + 1}
+                    </button>
+                  ))}
+                </div>
+                <button 
+                  onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))} 
+                  disabled={paginaAtual === totalPaginas} 
+                  className="px-6 py-3 rounded-full bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-all font-display"
+                >
+                  Próxima
+                </button>
+              </div>
+            )}
+          </>
         )}
-        {/* Controles de paginação - agora logo após a grid */}
-        <div className="flex justify-center mt-8 gap-2">
-          <button onClick={() => setPaginaAtual(p => Math.max(1, p - 1))} disabled={paginaAtual === 1} className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50">Anterior</button>
-          {[...Array(totalPaginas)].map((_, idx) => (
-            <button key={idx} onClick={() => setPaginaAtual(idx + 1)} className={`px-3 py-1 rounded ${paginaAtual === idx + 1 ? 'bg-blue-500 text-white' : 'bg-gray-700 text-white'}`}>{idx + 1}</button>
-          ))}
-          <button onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))} disabled={paginaAtual === totalPaginas} className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50">Próxima</button>
-        </div>
       </section>
 
       {/* Project Details Modal */}
-      {selectedProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div 
-            className="bg-black/90 border border-white/10 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+      <AnimatePresence>
+        {selectedProject && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
+            onClick={closeProjectDetails}
           >
-            {/* Modal Header */}
-            <div className="relative h-64 overflow-hidden">
-              {selectedProject.imagem_url && (
-                <img
-                  src={selectedProject.imagem_url}
-                  alt={selectedProject.titulo}
-                  className="w-full h-full object-cover"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-8">
-                <h2 className="text-3xl font-bold">{selectedProject.titulo}</h2>
-              </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#0a0a0a] border border-white/10 rounded-[2rem] w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl relative"
+            >
+              {/* Close Button */}
               <button 
                 onClick={closeProjectDetails}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center hover:bg-blue-500/20 transition-colors"
+                className="absolute top-6 right-6 z-20 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
               </button>
-            </div>
-            {/* Modal Content */}
-            <div className="p-8">
-              <p className="text-gray-400 mb-6">{selectedProject.descricao}</p>
-              {selectedProject.link && (
-                <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline block mb-4">Ver Projeto</a>
-              )}
-              <p className="text-xs text-gray-500 mt-2">Criado em: {new Date(selectedProject.criado_em).toLocaleDateString('pt-BR')}</p>
-              <div className="mt-8 pt-8 border-t border-white/10 flex justify-center">
-                <button
-                  onClick={closeProjectDetails}
-                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-full text-white transition-colors flex items-center gap-2"
-                >
-                  <span>Fechar Detalhes</span>
-                  <X className="w-4 h-4" />
-                </button>
+
+              {/* Modal Header */}
+              <div className="relative h-[40vh] overflow-hidden bg-white/5">
+                {selectedProject.imagem_url ? (
+                  <img
+                    src={selectedProject.imagem_url}
+                    alt={selectedProject.titulo}
+                    className="w-full h-full object-contain p-10"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-700">
+                    <Code className="w-24 h-24" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
+                
+                <div className="absolute bottom-0 left-0 w-full p-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    {selectedProject.categorias?.map((cat, idx) => (
+                      <span key={idx} className="px-4 py-1.5 rounded-full text-sm font-medium bg-blue-500 text-white shadow-lg shadow-blue-500/20">
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
+                  <h2 className="text-4xl md:text-5xl font-bold text-white font-display tracking-tight">
+                    {selectedProject.titulo}
+                  </h2>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+
+              {/* Modal Content */}
+              <div className="p-10 grid md:grid-cols-3 gap-10">
+                <div className="md:col-span-2 space-y-8">
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-4 font-display">Sobre o Projeto</h3>
+                    <p className="text-gray-400 leading-relaxed text-lg font-light font-sans">
+                      {selectedProject.descricao}
+                    </p>
+                  </div>
+
+                  {selectedProject.linguagens && selectedProject.linguagens.length > 0 && (
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-4 font-display">Tecnologias</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProject.linguagens.map((lang, idx) => (
+                          <span key={idx} className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm">
+                            {lang}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-6">
+                  <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Data</span>
+                      <span className="text-white">{new Date(selectedProject.criado_em).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    {/* Add more metadata if available */}
+                  </div>
+
+                  {selectedProject.link && (
+                    <a 
+                      href={selectedProject.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors"
+                    >
+                      <span>Ver Projeto Online</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* CTA */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="bg-gradient-to-r from-blue-600/20 to-blue-400/5 p-12 rounded-2xl backdrop-blur-sm border border-blue-500/20 text-center">
-          <h2 className="text-4xl font-bold mb-4">Vamos Criar Seu Projeto?</h2>
-          <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
-            Transforme sua ideia em realidade com nossa expertise em desenvolvimento.
-          </p>
-          <Link 
-            to="/contato" 
-            className="cta-button inline-flex items-center gap-2 px-8 py-4 bg-blue-500 hover:bg-blue-600 rounded-full text-white"
-          >
-            <span>Iniciar Projeto</span>
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-        </div>
+      <section className="container mx-auto px-4 relative z-10">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="relative rounded-[2.5rem] overflow-hidden border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-12 md:p-20 text-center group"
+        >
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[300px] bg-blue-500/10 blur-[100px] rounded-full -mt-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          
+          <div className="relative z-10 max-w-3xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 font-display text-white">
+              Gostou do que viu?
+            </h2>
+            <p className="text-gray-400 text-lg mb-10 font-light leading-relaxed">
+              Vamos criar o próximo case de sucesso da sua empresa.
+            </p>
+            <Link 
+              to="/contato" 
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-black font-medium hover:scale-105 transition-all duration-300 group"
+            >
+              <span className="font-display">Iniciar Projeto</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </motion.div>
       </section>
     </div>
   );

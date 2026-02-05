@@ -1,9 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Send, X, Bot, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { MessageSquare, Send, X, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import OpenAI from 'openai';
 
-// Initialize the Gemini API with your API key
-const genAI = new GoogleGenerativeAI('AIzaSyCI0CHMqlAlHVAAsoRKeh8TotCVXWvp1vA');
+// Initialize the OpenAI API with your API key
+// Note: dangerouslyAllowBrowser: true is required for client-side usage,
+// but it is not recommended for production environments.
+const openai = new OpenAI({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true
+});
 
 // Company information for the AI to use
 const COMPANY_INFO = `
@@ -106,7 +111,7 @@ Diferenciais:
 // Initial system prompt for the AI
 const SYSTEM_PROMPT = `
 Você é um assistente virtual da Codepacce, uma empresa especializada em desenvolvimento de software sob medida.
-Seu nome é Bolt, o assistente virtual da Codepacce.
+Seu nome é Equipe Codepacce, o assistente virtual da Codepacce.
 
 Use as seguintes informações sobre a empresa para responder às perguntas dos usuários:
 ${COMPANY_INFO}
@@ -135,28 +140,13 @@ export function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Olá! Sou Bolt, o assistente virtual da Codepacce. Como posso ajudar você hoje com soluções de software?'
+      content: 'Olá! Somos a Equipe Codepacce. Como posso ajudar você hoje com soluções de software?'
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [model, setModel] = useState<any>(null);
-
-  // Initialize the model
-  useEffect(() => {
-    const initModel = async () => {
-      try {
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-        setModel(model);
-      } catch (error) {
-        console.error("Error initializing Gemini model:", error);
-      }
-    };
-    
-    initModel();
-  }, []);
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -191,9 +181,9 @@ export function ChatBot() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!inputValue.trim() || !model) return;
+    if (!inputValue.trim()) return;
     
-    const userMessage = { role: 'user', content: inputValue.trim() };
+    const userMessage: Message = { role: 'user', content: inputValue.trim() };
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
@@ -206,27 +196,17 @@ export function ChatBot() {
         userMessage
       ];
       
-      // Convert to format expected by Gemini
-      const formattedHistory = history.map(msg => ({
-        role: msg.role === 'assistant' ? 'model' : msg.role,
-        parts: [{ text: msg.content }]
-      }));
-      
-      // Start a chat session
-      const chat = model.startChat({
-        history: formattedHistory.slice(1, -1), // Exclude system prompt and latest user message
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024,
-        },
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo", // or "gpt-4" if preferred/available
+        messages: history.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        temperature: 0.7,
+        max_tokens: 1024,
       });
-      
-      // Generate response
-      const result = await chat.sendMessage(userMessage.content);
-      const response = result.response;
-      const responseText = response.text();
+
+      const responseText = response.choices[0]?.message?.content || "Desculpe, não consegui gerar uma resposta.";
       
       setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
     } catch (error) {
@@ -248,10 +228,14 @@ export function ChatBot() {
       {/* Chat Button */}
       <button
         onClick={toggleChat}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-600 transition-all z-50 hover:scale-110"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-600 transition-all z-50 hover:scale-110 p-0 overflow-hidden animate-pulse-white"
         aria-label="Abrir chat"
       >
-        <MessageSquare className="w-6 h-6" />
+        <img 
+          src="/logo code azul.jpeg" 
+          alt="Chat" 
+          className="w-full h-full object-cover"
+        />
       </button>
 
       {/* Chat Window */}
@@ -267,11 +251,11 @@ export function ChatBot() {
             onClick={toggleMinimize}
           >
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="https://i.ibb.co/svc1sb57/Logo-para-instagram.png" 
+                  src="/logo code azul.jpeg" 
                   alt="Codepacce Bot" 
-                  className="w-6 h-6 object-contain"
+                  className="w-full h-full object-cover"
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = '';
@@ -285,7 +269,7 @@ export function ChatBot() {
                 />
               </div>
               <div>
-                <h3 className="font-medium text-white">Bolt</h3>
+                <h3 className="font-medium text-white">Equipe Codepacce</h3>
                 <p className="text-xs text-white/70">Assistente Virtual</p>
               </div>
             </div>

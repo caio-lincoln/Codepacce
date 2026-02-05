@@ -131,11 +131,11 @@ export function Produtos() {
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${mainProduct.image})` }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-black/90" />
+              <div className="absolute inset-0 bg-blue-900/90" />
             </div>
             <div className="relative z-10 h-full flex flex-col justify-center p-8 lg:p-12 text-center">
               <Bot className="w-16 h-16 text-blue-500 mb-6 mx-auto" />
-              <h2 className="text-4xl font-bold mb-4 gradient-text">{mainProduct.name}</h2>
+              <h2 className="text-4xl font-bold mb-4 text-blue-500">{mainProduct.name}</h2>
               <p className="text-xl text-gray-300 mb-6">{mainProduct.tagline}</p>
               <p className="text-gray-400 max-w-3xl mx-auto">{mainProduct.description}</p>
             </div>
@@ -229,7 +229,7 @@ export function Produtos() {
 
       {/* CTA */}
       <section className="container mx-auto px-4">
-        <div className="bg-gradient-to-r from-blue-600/20 to-blue-400/5 p-12 rounded-2xl backdrop-blur-sm 
+        <div className="bg-blue-600/20 p-12 rounded-2xl backdrop-blur-sm 
                      border border-blue-500/20 text-center hover-lift">
           <h2 className="text-4xl font-bold mb-4">Revolucione sua Comunicação por Email</h2>
           <p className="text-gray-400 mb-8 max-w-2xl mx-auto">

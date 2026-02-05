@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Code2,
   Database,
@@ -818,7 +819,7 @@ export function Tecnologias() {
     return matchesSearch && matchesCategory && matchesLevel;
   });
 
-  const toggleTechDetails = (techName) => {
+  const toggleTechDetails = (techName: string) => {
     if (expandedTech === techName) {
       setExpandedTech(null);
     } else {
@@ -826,7 +827,7 @@ export function Tecnologias() {
     }
   };
 
-  const getLevelLabel = (level) => {
+  const getLevelLabel = (level: string) => {
     switch (level) {
       case 'advanced': return 'Avançado';
       case 'intermediate': return 'Intermediário';
@@ -835,7 +836,7 @@ export function Tecnologias() {
     }
   };
 
-  const getCategoryLabel = (category) => {
+  const getCategoryLabel = (category: string) => {
     switch (category) {
       case 'frontend': return 'Frontend';
       case 'backend': return 'Backend';
@@ -848,21 +849,38 @@ export function Tecnologias() {
   };
 
   return (
-    <div className="py-20">
+    <div className="pt-32 pb-20 overflow-hidden min-h-screen">
+      {/* Background Elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
+        <div className="absolute top-20 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] -z-10" />
+      </div>
+
       {/* Hero */}
-      <section className="container mx-auto px-4 mb-16">
+      <section className="container mx-auto px-4 mb-16 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold mb-6">Stack Tecnológico</h1>
-          <p className="text-gray-400 text-lg mb-12">
-            Nossa expertise abrange um amplo conjunto de tecnologias modernas e robustas,
-            permitindo-nos desenvolver soluções completas e escaláveis para qualquer desafio.
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-400 text-sm mb-6 backdrop-blur-sm tracking-wide">
+              Nossa Expertise
+            </span>
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 font-display tracking-tight text-white">
+              Stack <span className="text-blue-500">Tecnológico</span>
+            </h1>
+            <p className="text-gray-400 text-xl font-light leading-relaxed max-w-2xl mx-auto">
+              Dominamos um amplo conjunto de tecnologias modernas e robustas para desenvolver soluções completas e escaláveis.
+            </p>
+          </motion.div>
         </div>
       </section>
 
       {/* Search and Filters */}
-      <section className="container mx-auto px-4 mb-12">
-        <div className="bg-black/50 p-6 rounded-lg backdrop-blur-sm border border-white/10">
+      <section className="container mx-auto px-4 mb-12 relative z-10">
+        <div className="bg-white/5 p-6 rounded-2xl backdrop-blur-md border border-white/10">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Search */}
             <div className="flex-grow">
@@ -873,7 +891,7 @@ export function Tecnologias() {
                   placeholder="Buscar tecnologias..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-black/30 border border-white/10 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full pl-10 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:outline-none focus:border-blue-500/50 focus:bg-black/40 transition-all text-white placeholder-gray-500"
                 />
               </div>
             </div>
@@ -885,15 +903,15 @@ export function Tecnologias() {
                 <select
                   value={activeCategory}
                   onChange={(e) => setActiveCategory(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-black/30 border border-white/10 rounded-lg focus:outline-none focus:border-blue-500 transition-colors appearance-none"
+                  className="w-full pl-10 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:outline-none focus:border-blue-500/50 focus:bg-black/40 transition-all appearance-none text-white cursor-pointer"
                 >
                   {categories.map(category => (
-                    <option key={category.id} value={category.id}>
+                    <option key={category.id} value={category.id} className="bg-gray-900 text-white">
                       {category.label}
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
               </div>
             </div>
 
@@ -904,15 +922,15 @@ export function Tecnologias() {
                 <select
                   value={activeLevel}
                   onChange={(e) => setActiveLevel(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-black/30 border border-white/10 rounded-lg focus:outline-none focus:border-blue-500 transition-colors appearance-none"
+                  className="w-full pl-10 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:outline-none focus:border-blue-500/50 focus:bg-black/40 transition-all appearance-none text-white cursor-pointer"
                 >
                   {levels.map(level => (
-                    <option key={level.id} value={level.id}>
+                    <option key={level.id} value={level.id} className="bg-gray-900 text-white">
                       {level.label}
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
               </div>
             </div>
           </div>
@@ -920,167 +938,199 @@ export function Tecnologias() {
       </section>
 
       {/* Technologies List */}
-      <section className="container mx-auto px-4 mb-20">
+      <section className="container mx-auto px-4 mb-20 relative z-10">
         {filteredTechnologies.length > 0 ? (
-          <div className="space-y-6">
-            {filteredTechnologies.map((tech) => (
-              <div 
-                key={tech.name}
-                className="bg-black/50 rounded-lg backdrop-blur-sm border border-white/10 overflow-hidden transition-all duration-300 hover:border-blue-500/30"
-              >
-                {/* Tech Header */}
-                <div 
-                  className="p-6 cursor-pointer"
-                  onClick={() => toggleTechDetails(tech.name)}
+          <div className="space-y-4">
+            <AnimatePresence>
+              {filteredTechnologies.map((tech) => (
+                <motion.div 
+                  key={tech.name}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
+                  className={`rounded-xl backdrop-blur-sm border transition-all duration-300 overflow-hidden ${
+                    expandedTech === tech.name 
+                      ? 'bg-white/10 border-blue-500/30 shadow-lg shadow-blue-500/5' 
+                      : 'bg-white/5 border-white/10 hover:bg-white/[0.07] hover:border-white/20'
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                        <tech.icon className="w-6 h-6 text-blue-500" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold">{tech.name}</h3>
-                        <p className="text-gray-400 text-sm">{tech.description}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="hidden md:flex items-center gap-2">
-                        <span className="text-gray-400 text-sm">{getCategoryLabel(tech.category)}</span>
-                        <span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>
-                        <span className={`px-3 py-1 rounded-full text-xs ${
-                          tech.level === 'advanced' 
-                            ? 'bg-blue-500/10 text-blue-400'
-                            : tech.level === 'intermediate'
-                              ? 'bg-green-500/10 text-green-400'
-                              : 'bg-yellow-500/10 text-yellow-400'
+                  {/* Tech Header */}
+                  <div 
+                    className="p-6 cursor-pointer"
+                    onClick={() => toggleTechDetails(tech.name)}
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                          expandedTech === tech.name ? 'bg-blue-500 text-white' : 'bg-white/10 text-blue-400'
                         }`}>
-                          {getLevelLabel(tech.level)}
-                        </span>
+                          <tech.icon className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold font-display text-white">{tech.name}</h3>
+                          <p className="text-gray-400 text-sm hidden md:block">{tech.description}</p>
+                        </div>
                       </div>
-                      {expandedTech === tech.name ? (
-                        <ChevronUp className="w-5 h-5 text-gray-400" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-gray-400" />
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tech Details */}
-                {expandedTech === tech.name && (
-                  <div className="p-6 border-t border-white/10 animate-fadeIn">
-                    <div className="grid md:grid-cols-2 gap-8">
-                      {/* Features */}
-                      <div>
-                        <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                          <CheckCircle className="w-5 h-5 text-blue-500" />
-                          <span>Recursos</span>
-                        </h4>
-                        <ul className="space-y-2">
-                          {tech.features.map((feature, idx) => (
-                            <li key={idx} className="flex items-start gap-2 feature-item">
-                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2"></div>
-                              <span className="text-gray-400">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* Use Cases */}
-                      <div>
-                        <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                          <Zap className="w-5 h-5 text-blue-500" />
-                          <span>Casos de Uso</span>
-                        </h4>
-                        <ul className="space-y-2">
-                          {tech.useCases.map((useCase, idx) => (
-                            <li key={idx} className="flex items-start gap-2 feature-item">
-                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2"></div>
-                              <span className="text-gray-400">{useCase}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    {/* Projects and Resources */}
-                    <div className="grid md:grid-cols-2 gap-8 mt-8">
-                      {/* Projects */}
-                      <div>
-                        <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                          <Code2 className="w-5 h-5 text-blue-500" />
-                          <span>Projetos</span>
-                        </h4>
-                        {tech.projects.length > 0 ? (
-                          <ul className="space-y-2">
-                            {tech.projects.map((project, idx) => (
-                              <li key={idx} className="flex items-start gap-2 feature-item">
-                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2"></div>
-                                <span className="text-gray-400">{project}</span>
-                              </li>
-                            ))}
-                          </ul>
+                      
+                      <div className="flex items-center justify-between md:justify-end gap-4 pl-16 md:pl-0">
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-500 text-sm font-medium">{getCategoryLabel(tech.category)}</span>
+                          <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                            tech.level === 'advanced' 
+                              ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                              : tech.level === 'intermediate'
+                                ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                : 'bg-white/5 text-gray-400 border-white/10'
+                          }`}>
+                            {getLevelLabel(tech.level)}
+                          </span>
+                        </div>
+                        {expandedTech === tech.name ? (
+                          <ChevronUp className="w-5 h-5 text-blue-400" />
                         ) : (
-                          <p className="text-gray-400">Tecnologia disponível para novos projetos.</p>
+                          <ChevronDown className="w-5 h-5 text-gray-500" />
                         )}
                       </div>
-
-                      {/* Resources */}
-                      <div>
-                        <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                          <ExternalLink className="w-5 h-5 text-blue-500" />
-                          <span>Recursos</span>
-                        </h4>
-                        <ul className="space-y-2">
-                          {tech.resources.map((resource, idx) => (
-                            <li key={idx} className="feature-item">
-                              <a 
-                                href={resource.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-blue-400 hover:text-blue-300 flex items-center gap-2"
-                              >
-                                <ExternalLink className="w-4 h-4" />
-                                <span>{resource.name}</span>
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
                     </div>
+                    <p className="text-gray-400 text-sm mt-4 md:hidden pl-16">{tech.description}</p>
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {/* Tech Details */}
+                  <AnimatePresence>
+                    {expandedTech === tech.name && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div className="px-6 pb-6 pt-0 pl-4 md:pl-20 border-t border-white/5 mt-2">
+                          <div className="grid md:grid-cols-2 gap-8 pt-6">
+                            {/* Features */}
+                            <div>
+                              <h4 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-4 flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-blue-500" />
+                                <span>Recursos</span>
+                              </h4>
+                              <ul className="grid gap-2">
+                                {tech.features.map((feature, idx) => (
+                                  <li key={idx} className="flex items-start gap-3 text-sm text-gray-300">
+                                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                                    <span>{feature}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            {/* Use Cases */}
+                            <div>
+                              <h4 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-4 flex items-center gap-2">
+                                <Zap className="w-4 h-4 text-blue-500" />
+                                <span>Casos de Uso</span>
+                              </h4>
+                              <ul className="grid gap-2">
+                                {tech.useCases.map((useCase, idx) => (
+                                  <li key={idx} className="flex items-start gap-3 text-sm text-gray-300">
+                                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                                    <span>{useCase}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+
+                          {/* Projects and Resources */}
+                          <div className="grid md:grid-cols-2 gap-8 mt-8 pt-6 border-t border-white/5">
+                            {/* Projects */}
+                            <div>
+                              <h4 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-4 flex items-center gap-2">
+                                <Code2 className="w-4 h-4 text-blue-500" />
+                                <span>Projetos Relacionados</span>
+                              </h4>
+                              {tech.projects.length > 0 ? (
+                                <ul className="grid gap-2">
+                                  {tech.projects.map((project, idx) => (
+                                    <li key={idx} className="flex items-start gap-3 text-sm text-gray-300">
+                                      <div className="w-1.5 h-1.5 bg-gray-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                                      <span>{project}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p className="text-gray-500 text-sm italic">Disponível para novos projetos.</p>
+                              )}
+                            </div>
+
+                            {/* Resources */}
+                            <div>
+                              <h4 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-4 flex items-center gap-2">
+                                <ExternalLink className="w-4 h-4 text-blue-500" />
+                                <span>Documentação & Recursos</span>
+                              </h4>
+                              <ul className="flex flex-wrap gap-3">
+                                {tech.resources.map((resource, idx) => (
+                                  <li key={idx}>
+                                    <a 
+                                      href={resource.url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-xs text-blue-400 hover:text-blue-300 transition-all"
+                                    >
+                                      <span>{resource.name}</span>
+                                      <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         ) : (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-blue-500" />
+          <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Search className="w-8 h-8 text-gray-600" />
             </div>
-            <h3 className="text-xl font-bold mb-2">Nenhuma tecnologia encontrada</h3>
-            <p className="text-gray-400">
-              Tente ajustar seus filtros ou termos de busca para encontrar o que procura.
+            <h3 className="text-2xl font-bold mb-3 font-display text-white">Nenhuma tecnologia encontrada</h3>
+            <p className="text-gray-400 max-w-md mx-auto">
+              Não encontramos tecnologias correspondentes aos seus filtros. Tente limpar os filtros ou buscar por outro termo.
             </p>
+            <button 
+              onClick={() => { setSearchTerm(''); setActiveCategory('all'); setActiveLevel('all'); }}
+              className="mt-6 px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm font-medium transition-colors"
+            >
+              Limpar Filtros
+            </button>
           </div>
         )}
       </section>
 
       {/* CTA */}
-      <section className="container mx-auto px-4">
-        <div className="bg-gradient-to-r from-blue-600/20 to-blue-400/5 p-12 rounded-2xl backdrop-blur-sm border border-blue-500/20 text-center">
-          <h2 className="text-4xl font-bold mb-4">Vamos Desenvolver Juntos?</h2>
-          <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
-            Nossa equipe está pronta para aplicar essas tecnologias no seu próximo projeto.
-          </p>
-          <Link 
-            to="/contato" 
-            className="inline-flex items-center gap-2 px-8 py-4 bg-blue-500 hover:bg-blue-600 rounded-full text-white
-                     transition-all duration-300 transform hover:scale-110 hover:shadow-lg hover:shadow-blue-500/50"
-          >
-            <span>Iniciar Projeto</span>
-            <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
+      <section className="container mx-auto px-4 relative z-10">
+        <div className="relative overflow-hidden bg-gradient-to-br from-blue-900/40 to-black p-12 rounded-3xl backdrop-blur-md border border-white/10 text-center group">
+          <div className="absolute inset-0 bg-blue-500/10 blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          
+          <div className="relative z-10 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 font-display text-white">Pronto para começar seu projeto?</h2>
+            <p className="text-gray-400 text-lg mb-10 leading-relaxed">
+              Nossa equipe de especialistas domina essas tecnologias para entregar a melhor solução para o seu negócio.
+            </p>
+            <Link 
+              to="/contato" 
+              className="inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-gray-200 rounded-full font-bold transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+            >
+              <span>Solicitar Orçamento</span>
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
       </section>
     </div>

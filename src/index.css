@@ -1,14 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-black text-white overflow-x-hidden min-h-screen;
+    @apply bg-black text-white overflow-x-hidden min-h-screen font-sans;
   }
 
-  #root {
-    @apply min-h-screen flex flex-col;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
   }
 }
 
@@ -18,9 +20,31 @@
   }
 }
 
-/* Header animations */
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-black;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-800 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-700;
+}
+
+/* Animations */
 .nav-link {
-  @apply relative;
+  @apply relative font-display;
 }
 
 .nav-link::after {
@@ -32,403 +56,28 @@
   @apply w-full;
 }
 
-/* Project card animations */
-.project-card {
-  @apply transition-all duration-500;
+/* Glass Effect Utility */
+.glass {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10;
 }
 
-.project-card:hover {
-  @apply transform scale-105 shadow-lg shadow-blue-500/10;
+.glass-hover {
+  @apply transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:shadow-lg hover:shadow-blue-500/5;
 }
 
-.project-image {
-  @apply transition-all duration-500;
-}
-
-.project-card:hover .project-image {
-  @apply scale-110;
-}
-
-/* Filter button animations */
-.filter-button {
-  @apply transition-all duration-300;
-}
-
-.filter-button:hover {
-  @apply transform scale-105 shadow-md shadow-blue-500/20;
-}
-
-/* Stats animations */
-.stat-number {
-  @apply transition-all duration-300;
-}
-
-.stat-number:hover {
-  @apply transform scale-110 text-blue-400;
-}
-
-/* CTA animations */
-.cta-button {
-  @apply transition-all duration-300;
-}
-
-.cta-button:hover {
-  @apply transform scale-105 shadow-lg shadow-blue-500/20;
-}
-
-/* Footer animations */
-.footer-link {
-  @apply transition-colors duration-300;
-}
-
-.footer-link:hover {
-  @apply text-blue-400;
-}
-
-/* Social icons animations */
-.social-icon {
-  @apply transition-all duration-300;
-}
-
-.social-icon:hover {
-  @apply transform scale-110 rotate-6;
-}
-
-/* Service card animations */
-.service-card {
-  @apply transition-all duration-500;
-}
-
-.service-card:hover {
-  @apply transform scale-105 bg-blue-900/20 border-blue-500/30 shadow-lg shadow-blue-500/10;
-}
-
-.service-icon {
-  @apply transition-all duration-500;
-}
-
-.service-card:hover .service-icon {
-  @apply transform scale-110 rotate-12;
-}
-
-/* Tech stack animations */
-.tech-card {
-  @apply transition-all duration-500;
-}
-
-.tech-card:hover {
-  @apply transform scale-105 bg-blue-900/20 border-blue-500/30;
-}
-
-.tech-icon {
-  @apply transition-all duration-500;
-}
-
-.tech-card:hover .tech-icon {
-  @apply transform scale-110 rotate-12;
-}
-
-/* Feature list animations */
-.feature-item {
-  @apply transition-all duration-300;
-}
-
-.feature-item:hover {
-  @apply transform translate-x-2;
-}
-
-/* Tag animations */
-.tech-tag {
-  @apply transition-all duration-300;
-}
-
-.tech-tag:hover {
-  @apply transform scale-110 bg-blue-500/20 text-blue-300;
-}
-
-/* Loading animation */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Chart animations */
-.chart-container {
-  @apply transition-all duration-500;
-}
-
-.chart-container:hover {
-  @apply transform scale-[1.02];
-}
-
-/* Timeline animations */
-.timeline-item {
-  @apply transition-all duration-300;
-}
-
-.timeline-item:hover {
-  @apply transform scale-105 bg-blue-900/20;
-}
-
-/* Value card animations */
-.value-card {
-  @apply transition-all duration-500;
-}
-
-.value-card:hover {
-  @apply transform scale-105 bg-blue-900/20 border-blue-500/30;
-}
-
-.value-icon {
-  @apply transition-all duration-500;
-}
-
-.value-card:hover .value-icon {
-  @apply transform scale-110 rotate-12;
-}
-
-/* Process step animations */
-.process-step {
-  @apply transition-all duration-500;
-}
-
-.process-step:hover {
-  @apply transform scale-110;
-}
-
-.process-icon {
-  @apply transition-all duration-500;
-}
-
-.process-step:hover .process-icon {
-  @apply transform rotate-12;
-}
-
-/* Responsive text adjustments */
-@media (max-width: 640px) {
-  .hero-title {
-    @apply text-3xl hyphens-auto;
-  }
-  
-  .hero-description {
-    @apply text-base hyphens-auto;
-  }
-  
-  .stat-number {
-    @apply text-2xl;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-  .hero-title {
-    @apply text-4xl;
-  }
-  
-  .stat-number {
-    @apply text-3xl;
-  }
-}
-
-/* Smooth scroll behavior */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Gradient text animation */
-.gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600;
-  background-size: 200% 200%;
-  animation: gradient 4s ease infinite;
-}
-
-@keyframes gradient {
+/* Pulse White Animation */
+@keyframes pulse-white {
   0% {
-    background-position: 0% 50%;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
   }
-  50% {
-    background-position: 100% 50%;
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
   }
   100% {
-    background-position: 0% 50%;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
   }
 }
 
-/* Button hover effects */
-.hover-glow {
-  @apply transition-all duration-300;
-}
-
-.hover-glow:hover {
-  @apply shadow-lg shadow-blue-500/20;
-}
-
-/* Card hover effects */
-.hover-lift {
-  @apply transition-all duration-500;
-}
-
-.hover-lift:hover {
-  @apply transform -translate-y-1 shadow-xl shadow-blue-500/10;
-}
-
-/* Icon spin animation */
-.spin-hover {
-  @apply transition-all duration-500;
-}
-
-.spin-hover:hover {
-  @apply transform rotate-180;
-}
-
-/* Scale animation */
-.scale-hover {
-  @apply transition-all duration-300;
-}
-
-.scale-hover:hover {
-  @apply transform scale-110;
-}
-
-/* Blur effect */
-.blur-effect {
-  @apply transition-all duration-300;
-}
-
-.blur-effect:hover {
-  @apply backdrop-blur-lg bg-opacity-20;
-}
-
-/* Form animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-.animate-fadeOut {
-  animation: fadeOut 0.3s ease-in forwards;
-}
-
-/* Chatbot animations */
-@keyframes slideIn {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    transform: translateY(10px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-slideIn {
-  animation: slideIn 0.3s ease-out forwards;
-}
-
-.animate-fadeInUp {
-  animation: fadeInUp 0.3s ease-out forwards;
-}
-
-/* Typing animation */
-.typing-indicator {
-  display: inline-flex;
-  align-items: center;
-}
-
-.typing-indicator span {
-  width: 6px;
-  height: 6px;
-  margin: 0 1px;
-  background-color: #fff;
-  border-radius: 50%;
-  display: inline-block;
-  opacity: 0.4;
-}
-
-.typing-indicator span:nth-child(1) {
-  animation: typing 1.4s infinite;
-}
-
-.typing-indicator span:nth-child(2) {
-  animation: typing 1.4s 0.2s infinite;
-}
-
-.typing-indicator span:nth-child(3) {
-  animation: typing 1.4s 0.4s infinite;
-}
-
-@keyframes typing {
-  0% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2);
-  }
-  100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-}
-
-/* Fix for header spacing */
-main {
-  padding-top: 60px;
-}
-
-/* Responsive fixes */
-@media (max-width: 768px) {
-  h1, h2, h3 {
-    word-break: break-word;
-    hyphens: auto;
-  }
-}
-
-.login-outline-btn {
-  @apply inline-flex items-center text-blue-500 border border-blue-500 rounded-full px-5 py-2 text-base font-medium bg-transparent transition-colors duration-200 hover:text-blue-400 hover:border-blue-400;
-  background: transparent;
-}
-
-.login-outline-btn .mr-2 {
-  margin-right: 0.5rem;
+.animate-pulse-white {
+  animation: pulse-white 2s infinite;
 }

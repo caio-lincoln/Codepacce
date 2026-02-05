@@ -71,8 +71,8 @@ export default function ResetPassword() {
               />
             </div>
           </div>
-          {error && <div className="text-red-500 text-sm text-center">{error}</div>}
-          {success && <div className="text-green-500 text-sm text-center">{success}</div>}
+          {error && <div className="text-white text-sm text-center bg-gray-800 p-2 rounded border border-white/10">{error}</div>}
+          {success && <div className="text-blue-500 text-sm text-center bg-blue-500/10 p-2 rounded border border-blue-500/20">{success}</div>}
           <button
             type="submit"
             className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20"

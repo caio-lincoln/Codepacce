@@ -37,11 +37,11 @@ export function Login() {
             backgroundImage: 'url("https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?auto=format&fit=crop&q=80")'
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-black/90" />
+          <div className="absolute inset-0 bg-blue-900/90" />
         </div>
         
         <div className="relative z-10 flex flex-col justify-center px-12">
-          <h2 className="text-4xl font-bold mb-6 gradient-text">
+          <h2 className="text-4xl font-bold mb-6 text-blue-500">
             Bem-vindo de volta
           </h2>
           <p className="text-gray-300 text-lg max-w-md">

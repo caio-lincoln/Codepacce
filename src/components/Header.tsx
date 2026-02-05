@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogIn, LogOut, User } from 'lucide-react';
+import { Menu, X, LogIn, LogOut, User, ArrowRight } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import logo from '../assets/logo-site-codepacce.png';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,145 +41,165 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-black z-50">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+    <>
+      <header className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+        <div className="pointer-events-auto w-full max-w-5xl bg-black/50 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl px-8 py-4 flex items-center justify-between transition-all duration-300 hover:bg-black/60 hover:border-white/20 hover:shadow-blue-500/5">
+          {/* Logo */}
           <div className="flex items-center">
-            <Link to="/">
+            <Link to="/" className="flex-shrink-0 group">
               <img 
-                src="https://i.ibb.co/ZphzLz7K/Logo-1.png" 
+                src={logo} 
                 alt="Codepacce Logo" 
-                className="h-8 w-auto"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = 'https://placehold.co/200x50/000000/FFFFFF?text=Codepacce';
-                }}
+                className="h-6 md:h-8 w-auto transition-transform duration-300 group-hover:scale-105"
               />
             </Link>
           </div>
           
-          <div className="hidden lg:flex items-center space-x-6">
-            <nav className="flex space-x-8">
-              <Link to="/" className="nav-link text-sm font-medium hover:text-blue-500 transition-colors">Home</Link>
-              <Link to="/servicos" className="nav-link text-sm font-medium hover:text-blue-500 transition-colors">Serviços</Link>
-              <Link to="/portfolio" className="nav-link text-sm font-medium hover:text-blue-500 transition-colors">Portfólio</Link>
-              <Link to="/produtos" className="nav-link text-sm font-medium hover:text-blue-500 transition-colors">Produtos</Link>
-              <Link to="/sobre" className="nav-link text-sm font-medium hover:text-blue-500 transition-colors">Sobre</Link>
-              {user && (
-                <Link to="/dashboard" className="nav-link text-sm font-medium hover:text-blue-500 transition-colors">Dashboard</Link>
-              )}
-            </nav>
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex items-center gap-10">
+            <Link to="/sobre" className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group font-display tracking-wide">
+              Sobre
+              <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+            <Link to="/servicos" className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group font-display tracking-wide">
+              Serviços
+              <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+            <Link to="/portfolio" className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group font-display tracking-wide">
+              Cases
+              <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+            <Link to="/contato" className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group font-display tracking-wide">
+              Consultoria Gratuita
+              <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+            {user && (
+              <Link to="/dashboard" className="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors font-display">Dashboard</Link>
+            )}
+          </nav>
+
+          {/* Right Side Actions */}
+          <div className="hidden lg:flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-4">
-                <User className="w-6 h-6 text-blue-400" />
-                <span className="text-blue-400 font-medium">{user.email.split('@')[0]}</span>
+                <span className="text-xs text-gray-500 hidden xl:block font-sans">{user.email?.split('@')[0]}</span>
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center space-x-2 text-xl font-medium text-red-400 hover:text-red-300 transition-colors py-2"
+                  className="text-gray-400 hover:text-white transition-colors"
+                  title="Sair"
                 >
-                  <LogOut className="w-6 h-6" />
-                  <span>Sair</span>
+                  <LogOut className="w-5 h-5" />
                 </button>
               </div>
             ) : (
               <Link 
-                to="/login" 
-                className="login-outline-btn"
-                onClick={() => setIsMenuOpen(false)}
+                to="/contato" 
+                className="group flex items-center gap-2 px-5 py-2 rounded-full bg-white text-black hover:bg-gray-200 transition-all text-sm font-bold hover:scale-105 font-display"
               >
-                <LogIn className="w-5 h-5 mr-2" />
-                <span>Login</span>
+                <span>Contato</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             )}
           </div>
 
+          {/* Mobile Toggle */}
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
+            className="lg:hidden p-2 text-gray-300 hover:text-white transition-colors"
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
-      </div>
+      </header>
 
+      {/* Mobile Menu Overlay */}
       <div 
         className={`
-          fixed inset-0 bg-black transform transition-transform duration-300 ease-in-out
+          fixed inset-0 bg-black/95 backdrop-blur-xl z-40 transform transition-transform duration-300 ease-in-out
           ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}
-          lg:hidden
+          lg:hidden flex flex-col
         `}
+        style={{ top: '0' }}
       >
-        <div className="container mx-auto px-4 py-4 flex justify-end">
-          <button
-            onClick={() => setIsMenuOpen(false)}
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
+        <div className="flex justify-end p-6 pt-8">
+          {/* Close button handled by header */}
         </div>
 
-        <div className="container mx-auto px-4 py-8">
-          <nav className="flex flex-col space-y-4">
-            <Link 
-              to="/" 
-              className="text-xl font-medium hover:text-blue-500 transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/servicos" 
-              className="text-xl font-medium hover:text-blue-500 transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Serviços
-            </Link>
-            <Link 
-              to="/portfolio" 
-              className="text-xl font-medium hover:text-blue-500 transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Portfólio
-            </Link>
-            <Link 
-              to="/produtos" 
-              className="text-xl font-medium hover:text-blue-500 transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Produtos
-            </Link>
-            <Link 
-              to="/sobre" 
-              className="text-xl font-medium hover:text-blue-500 transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Sobre
-            </Link>
+        <div className="container mx-auto px-6 pt-32 pb-10 flex flex-col items-center justify-center space-y-8 overflow-y-auto">
+          <Link 
+            to="/" 
+            className="text-3xl font-bold hover:text-blue-500 transition-colors font-display tracking-tight"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Home
+          </Link>
+          <Link 
+            to="/sobre" 
+            className="text-3xl font-bold hover:text-blue-500 transition-colors font-display tracking-tight"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Sobre
+          </Link>
+          <Link 
+            to="/servicos" 
+            className="text-3xl font-bold hover:text-blue-500 transition-colors font-display tracking-tight"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Serviços
+          </Link>
+          <Link 
+            to="/portfolio" 
+            className="text-3xl font-bold hover:text-blue-500 transition-colors font-display tracking-tight"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Cases
+          </Link>
+          <Link 
+            to="/produtos" 
+            className="text-3xl font-bold hover:text-blue-500 transition-colors font-display tracking-tight"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Produtos
+          </Link>
+          <Link 
+            to="/contato" 
+            className="text-3xl font-bold hover:text-blue-500 transition-colors font-display tracking-tight"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Consultoria Gratuita
+          </Link>
+
+          <div className="pt-8 flex flex-col items-center gap-6">
             {user ? (
-              <div className="flex items-center gap-4">
-                <User className="w-6 h-6 text-blue-400" />
-                <span className="text-blue-400 font-medium">{user.email.split('@')[0]}</span>
+              <>
+                <Link 
+                  to="/dashboard" 
+                  className="text-xl font-medium text-blue-400 font-display"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center space-x-2 text-xl font-medium text-red-400 hover:text-red-300 transition-colors py-2"
+                  className="flex items-center gap-2 text-xl font-medium text-white font-display"
                 >
                   <LogOut className="w-6 h-6" />
                   <span>Sair</span>
                 </button>
-              </div>
+              </>
             ) : (
               <Link 
                 to="/login" 
-                className="login-outline-btn"
+                className="flex items-center gap-2 px-8 py-3 rounded-full bg-white text-black hover:bg-gray-200 font-bold transition-all font-display"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <LogIn className="w-5 h-5 mr-2" />
+                <LogIn className="w-5 h-5" />
                 <span>Login</span>
               </Link>
             )}
-          </nav>
+          </div>
         </div>
       </div>
-    </header>
+    </>
   );
 }

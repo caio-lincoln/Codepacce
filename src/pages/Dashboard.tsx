@@ -440,7 +440,7 @@ export function Dashboard() {
               <p className="text-gray-400 text-sm mt-2">Bem-vindo{user ? `, ${user.email}` : ''}</p>
             </div>
             <nav className="flex flex-col gap-4">
-              <button onClick={() => setAba('portfolio')} className={`flex items-center gap-3 text-lg font-medium transition-colors ${aba === 'portfolio' ? 'text-blue-400' : 'hover:text-blue-400'}`}> <Folder className="w-5 h-5" /> Portfólio </button>
+              <button onClick={() => setAba('portfolio')} className={`flex items-center gap-3 text-lg font-medium transition-colors ${aba === 'portfolio' ? 'text-blue-400' : 'hover:text-blue-400'}`}> <Folder className="w-5 h-5" /> Cases </button>
               <button onClick={() => setAba('estatisticas')} className={`flex items-center gap-3 text-lg font-medium transition-colors ${aba === 'estatisticas' ? 'text-blue-400' : 'hover:text-blue-400'}`}> <BarChart2 className="w-5 h-5" /> Estatísticas </button>
               <button onClick={() => setAba('tags')} className={`flex items-center gap-3 text-lg font-medium transition-colors ${aba === 'tags' ? 'text-blue-400' : 'hover:text-blue-400'}`}> <FolderOpen className="w-5 h-5" /> Tags </button>
             </nav>
@@ -448,7 +448,7 @@ export function Dashboard() {
         </aside>
         {/* Área principal */}
         <main className="flex-1 p-10 bg-black min-h-screen">
-          <h2 className="text-3xl font-bold mb-8">Painel de Portfólio</h2>
+          <h2 className="text-3xl font-bold mb-8">Painel de Cases</h2>
           {/* Estatísticas rápidas - só na aba estatísticas */}
           {aba === 'estatisticas' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
@@ -472,7 +472,7 @@ export function Dashboard() {
           {aba === 'portfolio' && (
             <>
               <form onSubmit={handleUploadProjeto} className="bg-black/60 rounded-xl p-8 mb-10 border border-white/10 max-w-2xl mx-auto flex flex-col gap-4">
-                <h3 className="text-2xl font-bold mb-2">Adicionar Projeto ao Portfólio</h3>
+                <h3 className="text-2xl font-bold mb-2">Adicionar Case</h3>
                 <input
                   type="text"
                   placeholder="Título"
@@ -597,8 +597,8 @@ export function Dashboard() {
                           )}
                           <p className="text-xs text-gray-500 mt-auto">Criado em: {new Date(proj.criado_em).toLocaleDateString('pt-BR')}</p>
                           <div className="flex gap-2 mt-4">
-                            <button className="px-3 py-1 bg-yellow-500 text-white rounded" onClick={() => openModalProjeto(proj)}>Editar</button>
-                            <button className="px-3 py-1 bg-red-500 text-white rounded" onClick={() => handleRemoverProjeto(proj.id)}>Remover</button>
+                            <button className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded border border-white/10" onClick={() => openModalProjeto(proj)}>Editar</button>
+                            <button className="px-3 py-1 bg-black hover:bg-white/10 text-white rounded border border-white/20" onClick={() => handleRemoverProjeto(proj.id)}>Remover</button>
                           </div>
                         </div>
                       </div>
@@ -631,14 +631,14 @@ export function Dashboard() {
                       {editLinguagemId === l.id ? (
                         <>
                           <input type="text" value={editLinguagemNome} onChange={e => setEditLinguagemNome(e.target.value)} className="px-2 py-1 rounded bg-black/30 border border-white/10 text-white" />
-                          <button onClick={salvarEdicaoLinguagem} className="bg-green-500 px-2 py-1 rounded text-white">Salvar</button>
-                          <button onClick={cancelarEdicaoLinguagem} className="bg-gray-500 px-2 py-1 rounded text-white">Cancelar</button>
+                          <button onClick={salvarEdicaoLinguagem} className="bg-blue-600 px-2 py-1 rounded text-white">Salvar</button>
+                          <button onClick={cancelarEdicaoLinguagem} className="bg-gray-700 px-2 py-1 rounded text-white">Cancelar</button>
                         </>
                       ) : (
                         <>
                           <span>{l.nome}</span>
-                          <button onClick={() => iniciarEdicaoLinguagem(l.id, l.nome)} className="bg-yellow-500 px-2 py-1 rounded text-white">Editar</button>
-                          <button onClick={() => removerLinguagem(l.id)} className="bg-red-500 px-2 py-1 rounded text-white">Remover</button>
+                          <button onClick={() => iniciarEdicaoLinguagem(l.id, l.nome)} className="bg-gray-800 border border-white/10 px-2 py-1 rounded text-white">Editar</button>
+                          <button onClick={() => removerLinguagem(l.id)} className="bg-black border border-white/20 px-2 py-1 rounded text-white">Remover</button>
                         </>
                       )}
                     </li>
