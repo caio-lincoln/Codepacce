@@ -8,9 +8,12 @@ import {
   Eye,
   Coffee,
   Clock,
-  Zap
+  Zap,
+  Heart
 } from 'lucide-react';
 import { PageBackground, PageHero, SectionHeader, CTASection } from '../components/PageLayoutComponents';
+import { FeatureCard } from '../components/ui/FeatureCard';
+import { StatCard } from '../components/ui/StatCard';
 
 export function Sobre() {
   const values = [
@@ -137,20 +140,14 @@ export function Sobre() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {values.map((value, index) => (
-            <motion.div 
-              key={index} 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white/[0.02] p-8 rounded-2xl backdrop-blur-sm border border-white/[0.05] hover:border-white/10 hover:bg-white/[0.04] transition-all duration-300 group text-center"
-            >
-              <div className="w-14 h-14 mx-auto rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center mb-6 text-gray-300 group-hover:text-blue-400 group-hover:border-blue-500/30 transition-all duration-300 group-hover:scale-110">
-                <value.icon className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 font-display text-white">{value.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed font-sans">{value.description}</p>
-            </motion.div>
+            <FeatureCard
+              key={index}
+              icon={value.icon}
+              title={value.title}
+              description={value.description}
+              delay={index * 0.1}
+              className="bg-white/[0.02] rounded-2xl border-white/[0.05] hover:bg-white/[0.04]"
+            />
           ))}
         </div>
       </section>
@@ -201,20 +198,13 @@ export function Sobre() {
       <section className="container mx-auto px-4 mb-32 relative z-10">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {stats.map((stat, index) => (
-            <motion.div 
-              key={index} 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="text-center group"
-            >
-              <div className="w-12 h-12 mx-auto mb-6 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-blue-400 group-hover:bg-blue-500/10 transition-all duration-300">
-                <stat.icon className="w-5 h-5" />
-              </div>
-              <p className="text-4xl font-bold text-white mb-2 font-display tracking-tight group-hover:text-blue-400 transition-colors duration-300">{stat.value}</p>
-              <p className="text-gray-500 text-sm font-medium uppercase tracking-wider font-sans">{stat.label}</p>
-            </motion.div>
+            <StatCard
+              key={index}
+              icon={stat.icon}
+              value={stat.value}
+              label={stat.label}
+              delay={index * 0.1}
+            />
           ))}
         </div>
       </section>

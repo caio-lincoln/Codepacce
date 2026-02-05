@@ -32,7 +32,7 @@ export function Login() {
       } else {
         window.location.href = '/dashboard';
       }
-    } catch (err) {
+    } catch {
       if (isMounted()) {
         setLoading(false);
         setError('Ocorreu um erro ao tentar entrar.');

@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import emailjs from '@emailjs/browser';
-import { PageBackground } from '../components/PageLayoutComponents';
+import { PageBackground, PageHero } from '../components/PageLayoutComponents';
 import { useIsMounted } from '../hooks/useIsMounted';
 import {
   Calendar as CalendarIcon,
@@ -103,10 +103,13 @@ export function Contato() {
         setFormStatus({ loading: false, success: true, error: '' });
         setStep(3);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (!isMounted()) return;
       // Ignorar erros de abortamento
-      if (error.name === 'AbortError' || error.message?.includes('aborted')) return;
+      if (
+        error instanceof Error && 
+        (error.name === 'AbortError' || error.message?.includes('aborted'))
+      ) return;
       
       console.error('Error sending email:', error);
       setFormStatus({ loading: false, success: false, error: 'Erro ao agendar. Tente novamente.' });
@@ -147,23 +150,15 @@ export function Contato() {
       <PageBackground />
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm mb-6 backdrop-blur-sm tracking-wide">
-              Fale Conosco
-            </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 font-display text-white">
+        <PageHero
+          badge="Fale Conosco"
+          title={
+            <>
               Entre em <span className="text-blue-500">Contato</span>
-            </h1>
-            <p className="text-gray-400 text-lg font-light">
-              Estamos prontos para atender você. Escolha a melhor forma de falar com nossa equipe.
-            </p>
-          </motion.div>
-        </div>
+            </>
+          }
+          description="Estamos prontos para atender você. Escolha a melhor forma de falar com nossa equipe."
+        />
 
         {/* Contact Info Cards */}
         <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-20">

@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, LogIn, LogOut, ArrowRight } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { User } from '@supabase/supabase-js';
 import logo from '../assets/logo-site-codepacce.png';
 import { useIsMounted } from '../hooks/useIsMounted';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const isMounted = useIsMounted();
@@ -18,7 +19,6 @@ export function Header() {
 
   useEffect(() => {
     const abortController = new AbortController();
-    const signal = abortController.signal;
 
     async function getSession() {
       try {
@@ -26,12 +26,12 @@ export function Header() {
         if (!isMounted()) return;
         if (error) throw error;
         setUser(data.user);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        if (!isMounted()) return;
+        // Ignorar erros de abortamento
         if (
-          error.name === 'AbortError' || 
-          signal.aborted || 
-          error.message?.includes('aborted') || 
-          error.code === 20 // DOMException.ABORT_ERR
+          error instanceof Error && 
+          (error.name === 'AbortError' || error.message?.includes('aborted') || (error as { code?: number }).code === 20)
         ) return;
         console.error('Error getting user:', error);
       }
@@ -49,7 +49,7 @@ export function Header() {
       abortController.abort();
       listener?.subscription.unsubscribe();
     };
-  }, []);
+  }, [isMounted]);
 
   useEffect(() => {
     if (isMenuOpen) {

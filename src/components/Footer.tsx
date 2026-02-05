@@ -51,6 +51,7 @@ export function Footer() {
               <img 
                 src={logo} 
                 alt="Codepacce Logo" 
+                loading="lazy"
                 className="h-8 w-auto opacity-90 hover:opacity-100 transition-opacity"
               />
             </Link>

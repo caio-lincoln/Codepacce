@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight,
@@ -11,7 +10,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { projectsService, Projeto } from '../services/projectsService';
-import { PageBackground } from '../components/PageLayoutComponents';
+import { PageBackground, PageHero, CTASection } from '../components/PageLayoutComponents';
 
 export function Projetos() {
   const [activeFilter, setActiveFilter] = useState('todos');
@@ -45,8 +44,8 @@ export function Projetos() {
         setAllProjects(loadedProjects);
         setProjects(loadedProjects);
         setCategoriasOpcoes(loadedCats);
-      } catch (error: any) {
-        if (error.name === 'AbortError' || signal.aborted) return;
+      } catch (error: unknown) {
+        if (error instanceof Error && (error.name === 'AbortError' || signal.aborted)) return;
         console.error('Falha ao carregar dados:', error);
         if (mounted) setError('Falha ao carregar projetos. Por favor, tente novamente.');
       } finally {
@@ -106,23 +105,14 @@ export function Projetos() {
     <div className="pt-32 pb-20 overflow-hidden min-h-screen">
       <PageBackground />
 
-      {/* Hero */}
-      <section className="container mx-auto px-4 mb-20 relative z-10">
-        <div className="text-center max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
-              Nossos Projetos
-            </h1>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Conheça algumas das soluções que desenvolvemos para transformar a realidade de nossos clientes.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        title={
+          <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
+            Nossos Projetos
+          </span>
+        }
+        description="Conheça algumas das soluções que desenvolvemos para transformar a realidade de nossos clientes."
+      />
 
       {/* Filters */}
       <section id="projetos-filtros" className="container mx-auto px-4 mb-16 relative z-10">
@@ -185,6 +175,7 @@ export function Projetos() {
                           transition={{ duration: 0.5 }}
                           src={project.imagem_url}
                           alt={project.titulo}
+                          loading="lazy"
                           className="relative z-10 max-h-full max-w-full object-contain drop-shadow-2xl"
                         />
                       ) : (
@@ -370,32 +361,12 @@ export function Projetos() {
       </AnimatePresence>
 
       {/* CTA */}
-      <section className="container mx-auto px-4 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="relative rounded-[2.5rem] overflow-hidden border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-12 md:p-20 text-center group"
-        >
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[300px] bg-blue-500/10 blur-[100px] rounded-full -mt-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-          
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 font-display text-white">
-              Gostou do que viu?
-            </h2>
-            <p className="text-gray-400 text-lg mb-10 font-light leading-relaxed">
-              Vamos criar o próximo case de sucesso da sua empresa.
-            </p>
-            <Link 
-              to="/contato" 
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-black font-medium hover:scale-105 transition-all duration-300 group"
-            >
-              <span className="font-display">Iniciar Projeto</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-        </motion.div>
-      </section>
+      <CTASection
+        title="Gostou do que viu?"
+        description="Vamos criar o próximo case de sucesso da sua empresa."
+        buttonText="Iniciar Projeto"
+        buttonLink="/contato"
+      />
     </div>
   );
 }

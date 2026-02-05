@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Code2,
   Database,
   Cloud,
   Layout,
-  Smartphone,
   Server,
-  Shield,
-  Cpu,
   Zap,
   Globe,
   Braces,
@@ -17,7 +13,6 @@ import {
   Box,
   GitBranch,
   Monitor,
-  ArrowRight,
   Search,
   Filter,
   CheckCircle,

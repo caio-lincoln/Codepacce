@@ -14,6 +14,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { PageBackground, PageHero, SectionHeader, CTASection } from '../components/PageLayoutComponents';
+import { FeatureCard } from '../components/ui/FeatureCard';
 
 export function Solucoes() {
   const solutions = [
@@ -110,43 +111,33 @@ export function Solucoes() {
       <section className="container mx-auto px-4 mb-32 relative z-10">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {solutions.map((solution, index) => (
-            <motion.div 
-              key={index} 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="group bg-white/5 p-8 rounded-[2rem] backdrop-blur-sm border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all duration-300 flex flex-col"
+            <FeatureCard
+              key={index}
+              icon={solution.icon}
+              title={solution.title}
+              description={solution.description}
+              delay={index * 0.1}
             >
-              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-8 text-gray-300 group-hover:text-blue-400 group-hover:border-blue-500/30 transition-all duration-300 group-hover:scale-110">
-                <solution.icon className="w-7 h-7" />
+              <div className="mb-6 space-y-3">
+                {solution.features.map((feature, idx) => (
+                  <div key={idx} className="flex items-start gap-3 text-sm text-gray-400 group-hover:text-gray-300 transition-colors font-sans">
+                    <CheckCircle2 className="w-4 h-4 text-blue-500/50 mt-0.5 shrink-0" />
+                    <span>{feature}</span>
+                  </div>
+                ))}
               </div>
-              
-              <h3 className="text-2xl font-bold mb-4 font-display text-white group-hover:text-blue-400 transition-colors">{solution.title}</h3>
-              <p className="text-gray-400 mb-8 font-light leading-relaxed font-sans">{solution.description}</p>
-              
-              <div className="mt-auto">
-                <div className="mb-6 space-y-3">
-                  {solution.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-3 text-sm text-gray-400 group-hover:text-gray-300 transition-colors font-sans">
-                      <CheckCircle2 className="w-4 h-4 text-blue-500/50 mt-0.5 shrink-0" />
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                </div>
 
-                <div className="pt-6 border-t border-white/10 flex flex-wrap gap-2">
-                  {solution.technologies.map((tech, idx) => (
-                    <span 
-                      key={idx} 
-                      className="px-3 py-1 bg-white/5 rounded-full text-xs text-gray-400 border border-white/5"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
+              <div className="pt-6 border-t border-white/10 flex flex-wrap gap-2">
+                {solution.technologies.map((tech, idx) => (
+                  <span 
+                    key={idx} 
+                    className="px-3 py-1 bg-white/5 rounded-full text-xs text-gray-400 border border-white/5"
+                  >
+                    {tech}
+                  </span>
+                ))}
               </div>
-            </motion.div>
+            </FeatureCard>
           ))}
         </div>
       </section>

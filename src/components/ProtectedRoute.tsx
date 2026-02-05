@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { User } from '@supabase/supabase-js';
 import { useIsMounted } from '../hooks/useIsMounted';
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const isMounted = useIsMounted();
 
@@ -15,10 +16,13 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
         if (!isMounted()) return;
         if (error) throw error;
         setUser(data.user);
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (!isMounted()) return;
         // Ignorar erros de abortamento
-        if (error.name === 'AbortError' || error.message?.includes('aborted')) return;
+        if (
+          error instanceof Error && 
+          (error.name === 'AbortError' || error.message?.includes('aborted'))
+        ) return;
         console.error('Auth error:', error);
       } finally {
         if (isMounted()) setLoading(false);

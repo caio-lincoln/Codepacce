@@ -378,12 +378,12 @@ const CATEGORIES_DATA = [
 ];
 
 export const projectsService = {
-  async getAllProjects(signal?: AbortSignal): Promise<Projeto[]> {
+  async getAllProjects(): Promise<Projeto[]> {
     // Retorna os dados estáticos imediatamente
     return PROJECTS_DATA;
   },
 
-  async getCategories(signal?: AbortSignal) {
+  async getCategories() {
     // Retorna as categorias estáticas imediatamente
     return CATEGORIES_DATA;
   }

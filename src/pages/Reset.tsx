@@ -31,9 +31,9 @@ export default function Reset() {
       } else {
         setSuccess('E-mail de recuperação enviado! Verifique sua caixa de entrada.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (!isMounted()) return;
-      if (err.name === 'AbortError' || err.message?.includes('aborted')) return;
+      if (err instanceof Error && (err.name === 'AbortError' || err.message?.includes('aborted'))) return;
       setLoading(false);
       setError('Ocorreu um erro inesperado.');
     }
