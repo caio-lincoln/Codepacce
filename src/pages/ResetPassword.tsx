@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { Lock, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useIsMounted } from '../hooks/useIsMounted';
+import { PageBackground } from '../components/PageLayoutComponents';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -10,14 +12,7 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const isMounted = React.useRef(true);
-
-  React.useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  const isMounted = useIsMounted();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +31,7 @@ export default function ResetPassword() {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       
-      if (!isMounted.current) return;
+      if (!isMounted()) return;
       
       setLoading(false);
       if (error) {
@@ -44,11 +39,11 @@ export default function ResetPassword() {
       } else {
         setSuccess('Senha redefinida com sucesso! Você pode fazer login com a nova senha.');
         setTimeout(() => {
-          if (isMounted.current) navigate('/login');
+          if (isMounted()) navigate('/login');
         }, 2500);
       }
     } catch (err: any) {
-      if (!isMounted.current) return;
+      if (!isMounted()) return;
       if (err.name === 'AbortError' || err.message?.includes('aborted')) return;
       setLoading(false);
       setError('Ocorreu um erro inesperado.');
@@ -56,8 +51,9 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <div className="w-full max-w-md bg-black/80 rounded-2xl p-8 border border-white/10 shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden">
+      <PageBackground />
+      <div className="w-full max-w-md bg-black/80 rounded-2xl p-8 border border-white/10 shadow-lg relative z-10">
         <h2 className="text-2xl font-bold mb-6 text-center">Definir Nova Senha</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

@@ -26,6 +26,7 @@ import {
   ChevronUp,
   ExternalLink
 } from 'lucide-react';
+import { PageBackground, PageHero, CTASection } from '../components/PageLayoutComponents';
 
 export function Tecnologias() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -298,183 +299,47 @@ export function Tecnologias() {
         "Arquitetura de microserviços",
         "Recursos avançados de segurança",
         "JPA para persistência de dados",
-        "Maven para gerenciamento de dependências"
+        "Multithreading robusto"
       ],
       useCases: [
-        "Aplicações empresariais",
-        "Sistemas bancários e financeiros",
-        "Aplicações de alta disponibilidade",
-        "Sistemas distribuídos"
+        "Aplicações corporativas",
+        "Sistemas bancários",
+        "Aplicações Android",
+        "Big Data"
       ],
       projects: [
-        "Healthcare Management System"
-      ],
-      resources: [
-        { name: "Documentação Oficial", url: "https://docs.oracle.com/en/java/" },
-        { name: "Spring Documentation", url: "https://spring.io/guides" }
-      ]
-    },
-    {
-      name: "Go",
-      category: "backend",
-      level: "intermediate",
-      icon: GitBranch,
-      description: "Linguagem de programação compilada, concorrente e estaticamente tipada desenvolvida pelo Google.",
-      features: [
-        "Goroutines para concorrência leve",
-        "Channels para comunicação entre goroutines",
-        "Servidor HTTP nativo",
-        "Ferramentas de teste integradas",
-        "Cross-compilação para múltiplas plataformas",
-        "Performance próxima a C/C++"
-      ],
-      useCases: [
-        "Microserviços",
-        "Ferramentas de linha de comando",
-        "Aplicações de rede",
-        "Sistemas distribuídos"
-      ],
-      projects: [],
-      resources: [
-        { name: "Documentação Oficial", url: "https://golang.org/doc/" },
-        { name: "Go by Example", url: "https://gobyexample.com/" }
-      ]
-    },
-
-    // Mobile
-    {
-      name: "React Native",
-      category: "mobile",
-      level: "advanced",
-      icon: Smartphone,
-      description: "Framework para desenvolvimento de aplicativos móveis nativos usando React e JavaScript.",
-      features: [
-        "Componentes nativos",
-        "Hot Reload para desenvolvimento rápido",
-        "Acesso a APIs nativas",
-        "Performance otimizada",
-        "Expo para desenvolvimento simplificado",
-        "Compartilhamento de código com web"
-      ],
-      useCases: [
-        "Aplicativos multiplataforma (iOS e Android)",
-        "MVPs e protótipos",
-        "Aplicativos empresariais",
-        "Aplicativos com UI complexa"
-      ],
-      projects: [
-        "Delivery App",
+        "Healthcare Management System",
         "Fintech App"
       ],
       resources: [
-        { name: "Documentação Oficial", url: "https://reactnative.dev/docs/getting-started" },
-        { name: "Expo Documentation", url: "https://docs.expo.dev/" }
+        { name: "Documentação Oficial", url: "https://docs.oracle.com/en/java/" },
+        { name: "Spring Framework", url: "https://spring.io/" }
       ]
     },
-    {
-      name: "Flutter",
-      category: "mobile",
-      level: "advanced",
-      icon: Smartphone,
-      description: "SDK da Google para criação de aplicativos nativos para mobile, web e desktop a partir de um único código base.",
-      features: [
-        "Widgets personalizáveis",
-        "Hot Reload para desenvolvimento rápido",
-        "Performance nativa",
-        "Animações fluidas",
-        "Material Design e Cupertino integrados",
-        "Gerenciamento de estado flexível"
-      ],
-      useCases: [
-        "Aplicativos multiplataforma",
-        "Aplicativos com UI complexa",
-        "MVPs e protótipos",
-        "Aplicativos que exigem alta performance"
-      ],
-      projects: [],
-      resources: [
-        { name: "Documentação Oficial", url: "https://flutter.dev/docs" },
-        { name: "Flutter Pub", url: "https://pub.dev/" }
-      ]
-    },
-    {
-      name: "Swift",
-      category: "mobile",
-      level: "intermediate",
-      icon: Terminal,
-      description: "Linguagem de programação poderosa e intuitiva para iOS, macOS, watchOS e tvOS.",
-      features: [
-        "UIKit para interfaces tradicionais",
-        "SwiftUI para interfaces declarativas",
-        "Core Data para persistência",
-        "Combine para programação reativa",
-        "Concorrência estruturada",
-        "Gerenciamento automático de memória"
-      ],
-      useCases: [
-        "Aplicativos iOS nativos",
-        "Aplicativos macOS",
-        "Aplicativos que exigem alta performance",
-        "Integração profunda com ecossistema Apple"
-      ],
-      projects: [],
-      resources: [
-        { name: "Documentação Oficial", url: "https://developer.apple.com/swift/" },
-        { name: "Swift.org", url: "https://swift.org/" }
-      ]
-    },
-    {
-      name: "Kotlin",
-      category: "mobile",
-      level: "intermediate",
-      icon: Code2,
-      description: "Linguagem de programação moderna, concisa e segura para desenvolvimento Android e multiplataforma.",
-      features: [
-        "Android SDK para desenvolvimento nativo",
-        "Jetpack Compose para UI declarativa",
-        "Coroutines para programação assíncrona",
-        "Flow para streams de dados",
-        "Room para persistência",
-        "Navigation para gerenciamento de rotas"
-      ],
-      useCases: [
-        "Aplicativos Android nativos",
-        "Aplicativos multiplataforma com Kotlin Multiplatform",
-        "Aplicativos empresariais",
-        "Aplicativos que exigem alta performance"
-      ],
-      projects: [],
-      resources: [
-        { name: "Documentação Oficial", url: "https://kotlinlang.org/docs/" },
-        { name: "Android Developers", url: "https://developer.android.com/kotlin" }
-      ]
-    },
-
+    
     // DevOps
     {
       name: "Docker",
       category: "devops",
       level: "advanced",
-      icon: Box,
-      description: "Plataforma para desenvolvimento, envio e execução de aplicações em contêineres isolados.",
+      icon: Server,
+      description: "Plataforma aberta para desenvolver, enviar e executar aplicativos em contêineres.",
       features: [
-        "Contêineres leves e portáteis",
-        "Docker Compose para orquestração local",
-        "Redes virtuais para comunicação entre contêineres",
-        "Volumes para persistência de dados",
-        "Segurança e isolamento",
-        "Docker Registry para armazenamento de imagens"
+        "Isolamento de ambientes",
+        "Portabilidade garantida",
+        "Docker Compose para multi-contêineres",
+        "Docker Swarm para orquestração",
+        "Gerenciamento eficiente de recursos",
+        "Hub com imagens oficiais"
       ],
       useCases: [
-        "Ambientes de desenvolvimento consistentes",
-        "Implantação de microserviços",
-        "CI/CD pipelines",
-        "Isolamento de aplicações"
+        "Padronização de ambientes de desenvolvimento",
+        "Microserviços",
+        "Integração Contínua",
+        "Implantação simplificada"
       ],
       projects: [
-        "E-commerce Fashion Store",
-        "SaaS Marketing Platform",
-        "Healthcare Management System"
+        "Todos os projetos"
       ],
       resources: [
         { name: "Documentação Oficial", url: "https://docs.docker.com/" },
@@ -486,17 +351,17 @@ export function Tecnologias() {
       category: "devops",
       level: "advanced",
       icon: Cloud,
-      description: "Sistema de orquestração de contêineres para automação de implantação, escalonamento e gerenciamento.",
+      description: "Sistema de orquestração de contêineres open-source para automação da implantação, dimensionamento e gerenciamento de aplicações.",
       features: [
-        "Clustering de nós",
-        "Auto-scaling horizontal e vertical",
-        "Balanceamento de carga integrado",
-        "Self-healing para recuperação automática",
-        "Service Mesh para comunicação entre serviços",
-        "Helm para gerenciamento de pacotes"
+        "Orquestração de contêineres em escala",
+        "Self-healing (auto-recuperação)",
+        "Load balancing e service discovery",
+        "Rollouts e rollbacks automatizados",
+        "Gerenciamento de configuração e secrets",
+        "Escalonamento horizontal automático"
       ],
       useCases: [
-        "Orquestração de microserviços",
+        "Gerenciamento de microserviços em produção",
         "Aplicações de alta disponibilidade",
         "Sistemas distribuídos",
         "Ambientes multi-cloud"
@@ -850,33 +715,17 @@ export function Tecnologias() {
 
   return (
     <div className="pt-32 pb-20 overflow-hidden min-h-screen">
-      {/* Background Elements */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
-        <div className="absolute top-20 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] -z-10" />
-      </div>
+      <PageBackground />
 
-      {/* Hero */}
-      <section className="container mx-auto px-4 mb-16 relative z-10">
-        <div className="text-center max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-400 text-sm mb-6 backdrop-blur-sm tracking-wide">
-              Nossa Expertise
-            </span>
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 font-display tracking-tight text-white">
-              Stack <span className="text-blue-500">Tecnológico</span>
-            </h1>
-            <p className="text-gray-400 text-xl font-light leading-relaxed max-w-2xl mx-auto">
-              Dominamos um amplo conjunto de tecnologias modernas e robustas para desenvolver soluções completas e escaláveis.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        badge="Nossa Expertise"
+        title={
+          <>
+            Stack <span className="text-blue-500">Tecnológico</span>
+          </>
+        }
+        description="Dominamos um amplo conjunto de tecnologias modernas e robustas para desenvolver soluções completas e escaláveis."
+      />
 
       {/* Search and Filters */}
       <section className="container mx-auto px-4 mb-12 relative z-10">
@@ -1113,26 +962,12 @@ export function Tecnologias() {
         )}
       </section>
 
-      {/* CTA */}
-      <section className="container mx-auto px-4 relative z-10">
-        <div className="relative overflow-hidden bg-gradient-to-br from-blue-900/40 to-black p-12 rounded-3xl backdrop-blur-md border border-white/10 text-center group">
-          <div className="absolute inset-0 bg-blue-500/10 blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-          
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 font-display text-white">Pronto para começar seu projeto?</h2>
-            <p className="text-gray-400 text-lg mb-10 leading-relaxed">
-              Nossa equipe de especialistas domina essas tecnologias para entregar a melhor solução para o seu negócio.
-            </p>
-            <Link 
-              to="/contato" 
-              className="inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-gray-200 rounded-full font-bold transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-            >
-              <span>Solicitar Orçamento</span>
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      <CTASection
+        title="Pronto para começar seu projeto?"
+        description="Nossa equipe de especialistas domina essas tecnologias para entregar a melhor solução para o seu negócio."
+        buttonText="Solicitar Orçamento"
+        buttonLink="/contato"
+      />
     </div>
   );
 }

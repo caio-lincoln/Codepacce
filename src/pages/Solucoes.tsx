@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Globe,
@@ -12,9 +11,9 @@ import {
   Settings,
   Users,
   Zap,
-  ArrowRight,
   CheckCircle2
 } from 'lucide-react';
+import { PageBackground, PageHero, SectionHeader, CTASection } from '../components/PageLayoutComponents';
 
 export function Solucoes() {
   const solutions = [
@@ -94,34 +93,18 @@ export function Solucoes() {
 
   return (
     <div className="pt-32 pb-20 overflow-hidden">
-      {/* Background Elements */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
-        <div className="absolute top-40 left-20 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
-        <div className="absolute bottom-40 right-20 w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[120px] -z-10" />
-      </div>
+      <PageBackground />
 
-      {/* Hero */}
-      <section className="container mx-auto px-4 mb-32 relative z-10">
-        <div className="text-center max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-400 text-sm mb-6 backdrop-blur-sm tracking-wide">
-              Expertise Técnica
-            </span>
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 font-display tracking-tight text-white">
-              Soluções de ponta a ponta para <br />
-              <span className="text-blue-500">desafios complexos</span>
-            </h1>
-            <p className="text-gray-400 text-xl font-light leading-relaxed max-w-2xl mx-auto font-sans">
-              Nossa stack tecnológica é selecionada para garantir performance, segurança e escalabilidade para o seu negócio.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        badge="Expertise Técnica"
+        title={
+          <>
+            Soluções de ponta a ponta para <br />
+            <span className="text-blue-500">desafios complexos</span>
+          </>
+        }
+        description="Nossa stack tecnológica é selecionada para garantir performance, segurança e escalabilidade para o seu negócio."
+      />
 
       {/* Solutions Grid */}
       <section className="container mx-auto px-4 mb-32 relative z-10">
@@ -170,17 +153,10 @@ export function Solucoes() {
 
       {/* Process Section - Refined */}
       <section className="container mx-auto px-4 mb-32 relative z-10">
-        <div className="text-center mb-20">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-4xl font-bold mb-4 font-display text-white"
-          >
-            Metodologia Ágil
-          </motion.h2>
-          <p className="text-gray-400 font-sans">Como transformamos complexidade em simplicidade</p>
-        </div>
+        <SectionHeader
+          title="Metodologia Ágil"
+          subtitle="Como transformamos complexidade em simplicidade"
+        />
 
         <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto relative">
           {/* Connecting Line (Desktop) */}
@@ -210,33 +186,12 @@ export function Solucoes() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="container mx-auto px-4 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="relative rounded-[2.5rem] overflow-hidden border border-white/10 bg-white/5 p-12 md:p-20 text-center group"
-        >
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[300px] bg-blue-500/10 blur-[100px] rounded-full -mt-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-          
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 font-display text-white">
-              Pronto para escalar sua tecnologia?
-            </h2>
-            <p className="text-gray-400 text-lg mb-10 font-light leading-relaxed font-sans">
-              Agende uma consultoria gratuita com nossos especialistas e descubra o melhor caminho para o seu projeto.
-            </p>
-            <Link 
-              to="/contato" 
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-black font-medium hover:scale-105 transition-all duration-300 group"
-            >
-              <span className="font-display">Falar com Especialista</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-        </motion.div>
-      </section>
+      <CTASection
+        title="Pronto para escalar sua tecnologia?"
+        description="Agende uma consultoria gratuita com nossos especialistas e descubra o melhor caminho para o seu projeto."
+        buttonText="Falar com Especialista"
+        buttonLink="/contato"
+      />
     </div>
   );
 }

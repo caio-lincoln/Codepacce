@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import emailjs from '@emailjs/browser';
+import { PageBackground } from '../components/PageLayoutComponents';
+import { useIsMounted } from '../hooks/useIsMounted';
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -56,14 +58,7 @@ export function Contato() {
   });
 
   // Ref para rastrear se o componente está montado
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  const isMounted = useIsMounted();
 
   const handleNext = () => {
     if (step === 1) {
@@ -82,7 +77,7 @@ export function Contato() {
   };
 
   const handleBookMeeting = async () => {
-    if (!isMounted.current) return;
+    if (!isMounted()) return;
     setFormStatus({ loading: true, success: false, error: '' });
 
     try {
@@ -104,12 +99,12 @@ export function Contato() {
         EMAILJS_PUBLIC_KEY
       );
 
-      if (isMounted.current) {
+      if (isMounted()) {
         setFormStatus({ loading: false, success: true, error: '' });
         setStep(3);
       }
     } catch (error: any) {
-      if (!isMounted.current) return;
+      if (!isMounted()) return;
       // Ignorar erros de abortamento
       if (error.name === 'AbortError' || error.message?.includes('aborted')) return;
       
@@ -149,12 +144,7 @@ export function Contato() {
 
   return (
     <div className="pt-32 pb-20 min-h-screen overflow-hidden">
-      {/* Background Elements */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
-        <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] -z-10" />
-      </div>
+      <PageBackground />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16">

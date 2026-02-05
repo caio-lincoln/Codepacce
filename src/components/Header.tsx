@@ -3,26 +3,27 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, LogIn, LogOut, ArrowRight } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import logo from '../assets/logo-site-codepacce.png';
+import { useIsMounted } from '../hooks/useIsMounted';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const isMounted = useIsMounted();
 
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location]);
 
   useEffect(() => {
-    let mounted = true;
     const abortController = new AbortController();
     const signal = abortController.signal;
 
     async function getSession() {
       try {
         const { data, error } = await supabase.auth.getUser();
-        if (!mounted) return;
+        if (!isMounted()) return;
         if (error) throw error;
         setUser(data.user);
       } catch (error: any) {
@@ -39,13 +40,12 @@ export function Header() {
     getSession();
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (mounted) {
+      if (isMounted()) {
         setUser(session?.user ?? null);
       }
     });
 
     return () => {
-      mounted = false;
       abortController.abort();
       listener?.subscription.unsubscribe();
     };

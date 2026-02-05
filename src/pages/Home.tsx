@@ -28,6 +28,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { PiBinoculars, PiStrategy, PiRocketLaunch, PiTrendUp, PiBrain, PiLightbulb, PiDesktop, PiDeviceMobile, PiWrench, PiUsersThree, PiShoppingCart, PiClock, PiCurrencyDollar, PiCheckSquare } from 'react-icons/pi';
+import { Counter } from '../components/ui/Counter';
+
 export function Home() {
 
 
@@ -84,28 +86,6 @@ export function Home() {
 
   const prevService = () => {
     setCurrentService((prev) => (prev - 1 + services.length) % services.length);
-  };
-
-  const Counter = ({ value, suffix = "", decimals = 0 }: { value: number, suffix?: string, decimals?: number }) => {
-    const nodeRef = useRef<HTMLSpanElement>(null);
-    const inView = useInView(nodeRef, { once: true, margin: "-50px" });
-    
-    React.useEffect(() => {
-      const node = nodeRef.current;
-      if (!node || !inView) return;
-
-      const controls = animate(0, value, {
-        duration: 2.5,
-        onUpdate(v) {
-          node.textContent = v.toFixed(v % 1 !== 0 ? decimals : 0) + suffix;
-        },
-        ease: "easeOut"
-      });
-
-      return () => controls.stop();
-    }, [value, suffix, decimals, inView]);
-
-    return <span ref={nodeRef}>0{suffix}</span>;
   };
 
   const stats = [

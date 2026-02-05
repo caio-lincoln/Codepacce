@@ -13,6 +13,7 @@ import {
   BarChart,
   CheckCircle
 } from 'lucide-react';
+import { PageBackground, PageHero, CTASection } from '../components/PageLayoutComponents';
 
 export function Produtos() {
   const mainProduct = {
@@ -111,16 +112,12 @@ export function Produtos() {
 
   return (
     <div className="py-20">
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 mb-20">
-        <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-5xl font-bold mb-6">Nossos Produtos</h1>
-          <p className="text-gray-400 text-lg">
-            Soluções inovadoras desenvolvidas com tecnologia de ponta para 
-            transformar a maneira como você se comunica.
-          </p>
-        </div>
-      </section>
+      <PageBackground />
+
+      <PageHero
+        title="Nossos Produtos"
+        description="Soluções inovadoras desenvolvidas com tecnologia de ponta para transformar a maneira como você se comunica."
+      />
 
       {/* Main Product - Selene */}
       <section className="container mx-auto px-4 mb-20">
@@ -228,25 +225,12 @@ export function Produtos() {
       </section>
 
       {/* CTA */}
-      <section className="container mx-auto px-4">
-        <div className="bg-blue-600/20 p-12 rounded-2xl backdrop-blur-sm 
-                     border border-blue-500/20 text-center hover-lift">
-          <h2 className="text-4xl font-bold mb-4">Revolucione sua Comunicação por Email</h2>
-          <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
-            Descubra como a Selene pode transformar sua estratégia de email marketing com 
-            inteligência artificial e performance incomparável.
-          </p>
-          <Link 
-            to="/contato" 
-            className="inline-flex items-center gap-2 px-8 py-4 bg-blue-500 hover:bg-blue-600 
-                     rounded-full text-white transition-all duration-300 hover:scale-105
-                     hover:shadow-lg hover:shadow-blue-500/20"
-          >
-            <span>Agendar Demonstração</span>
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-        </div>
-      </section>
+      <CTASection
+        title="Revolucione sua Comunicação por Email"
+        description="Descubra como a Selene pode transformar sua estratégia de email marketing com inteligência artificial e performance incomparável."
+        buttonText="Agendar Demonstração"
+        buttonLink="/contato"
+      />
     </div>
   );
 }

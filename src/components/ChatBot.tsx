@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, X, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import OpenAI from 'openai';
+import { useIsMounted } from '../hooks/useIsMounted';
 
 // Initialize the OpenAI API with your API key
 // Note: dangerouslyAllowBrowser: true is required for client-side usage,
@@ -147,14 +148,7 @@ export function ChatBot() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  const isMounted = useIsMounted();
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -216,11 +210,11 @@ export function ChatBot() {
 
       const responseText = response.choices[0]?.message?.content || "Desculpe, não consegui gerar uma resposta.";
       
-      if (isMounted.current) {
+      if (isMounted()) {
         setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
       }
     } catch (error: any) {
-      if (!isMounted.current) return;
+      if (!isMounted()) return;
       // Ignore abort errors
       if (error.name === 'AbortError' || error.message?.includes('aborted')) return;
       
@@ -233,7 +227,7 @@ export function ChatBot() {
         }
       ]);
     } finally {
-      if (isMounted.current) {
+      if (isMounted()) {
         setIsLoading(false);
       }
     }

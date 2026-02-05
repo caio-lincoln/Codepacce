@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import { LogOut, Home, Folder, BarChart2, FolderOpen } from 'lucide-react';
+import { useIsMounted } from '../hooks/useIsMounted';
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -53,23 +54,16 @@ export function Dashboard() {
   const [totalPaginas, setTotalPaginas] = useState(1);
   const projetosPorPagina = 9;
   
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  const isMounted = useIsMounted();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (isMounted.current) setUser(data.user);
+      if (isMounted()) setUser(data.user);
     }).catch(() => {});
 
     setLoadingGlobal(true);
     fetchTags().then(() => {
-      if (isMounted.current) setLoadingGlobal(false);
+      if (isMounted()) setLoadingGlobal(false);
     });
   }, []);
 
@@ -96,20 +90,18 @@ export function Dashboard() {
 
   // Buscar projetos ao carregar e após upload
   useEffect(() => {
-    let mounted = true;
     const abortController = new AbortController();
     const signal = abortController.signal;
 
-    fetchProjetos(signal, mounted);
+    fetchProjetos(signal);
 
     return () => {
-      mounted = false;
       abortController.abort();
     };
   }, [linguagensOpcoes, categoriasOpcoes, projetosPorPagina]); // Dependências do fetch
 
-  async function fetchProjetos(signal?: AbortSignal, mounted: boolean = true) {
-    if (!mounted) return;
+  async function fetchProjetos(signal?: AbortSignal) {
+    if (!isMounted()) return;
     setLoadingProjetos(true);
     
     try {
@@ -120,7 +112,7 @@ export function Dashboard() {
         .order('criado_em', { ascending: false })
         .abortSignal(signal || new AbortController().signal);
 
-      if (!mounted) return;
+      if (!isMounted()) return;
 
       if (error) throw error;
       
@@ -144,7 +136,7 @@ export function Dashboard() {
 
       if (relCategoriasError) throw relCategoriasError;
 
-      if (!mounted) return;
+      if (!isMounted()) return;
 
       const projetosComTags = projetosData.map(proj => {
         const linguagensIds = relLinguagens?.filter(r => r.projeto_id === proj.id).map(r => r.linguagem_id) || [];
@@ -163,7 +155,7 @@ export function Dashboard() {
       }
       console.error('Erro ao buscar projetos:', error);
     } finally {
-      if (mounted) {
+      if (isMounted()) {
         setLoadingProjetos(false);
       }
     }

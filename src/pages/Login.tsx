@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { Link } from 'react-router-dom';
+import { useIsMounted } from '../hooks/useIsMounted';
 
 export function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,14 +10,7 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const isMounted = useRef(true);
-
-  React.useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  const isMounted = useIsMounted();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +24,7 @@ export function Login() {
         password,
       });
       
-      if (!isMounted.current) return;
+      if (!isMounted()) return;
 
       if (error) {
         setLoading(false);
@@ -39,7 +33,7 @@ export function Login() {
         window.location.href = '/dashboard';
       }
     } catch (err) {
-      if (isMounted.current) {
+      if (isMounted()) {
         setLoading(false);
         setError('Ocorreu um erro ao tentar entrar.');
       }

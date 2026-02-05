@@ -11,6 +11,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { projectsService, Projeto } from '../services/projectsService';
+import { PageBackground } from '../components/PageLayoutComponents';
 
 export function Projetos() {
   const [activeFilter, setActiveFilter] = useState('todos');
@@ -103,12 +104,7 @@ export function Projetos() {
 
   return (
     <div className="pt-32 pb-20 overflow-hidden min-h-screen">
-      {/* Background Elements */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
-        <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] -z-10" />
-      </div>
+      <PageBackground />
 
       {/* Hero */}
       <section className="container mx-auto px-4 mb-20 relative z-10">
@@ -118,14 +114,11 @@ export function Projetos() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-400 text-sm mb-6 backdrop-blur-sm tracking-wide">
-              Cases
-            </span>
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 font-display tracking-tight text-white">
-              Nossas <span className="text-blue-500">Obras Primas</span>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
+              Nossos Projetos
             </h1>
-            <p className="text-gray-400 text-xl font-light leading-relaxed max-w-2xl mx-auto font-sans">
-              Explore nossa galeria de projetos e descubra como transformamos desafios complexos em soluções digitais elegantes.
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Conheça algumas das soluções que desenvolvemos para transformar a realidade de nossos clientes.
             </p>
           </motion.div>
         </div>
