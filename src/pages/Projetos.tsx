@@ -1,29 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ShoppingBag,
-  Smartphone,
-  Building2,
-  Briefcase,
   ArrowRight,
   ExternalLink,
   X,
   Code,
-  Calendar,
-  Users,
-  CheckCircle,
-  Clock,
-  Layers,
-  Database,
-  Globe,
-  Server,
-  Shield,
-  Zap,
-  BarChart,
-  Cpu,
-  Search
+  Calendar
 } from 'lucide-react';
 
 type Projeto = {
@@ -43,32 +27,12 @@ export function Projetos() {
   const [selectedProject, setSelectedProject] = useState<Projeto | null>(null);
   const [allProjects, setAllProjects] = useState<Projeto[]>([]);
   const [projects, setProjects] = useState<Projeto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
-  const [novoProjeto, setNovoProjeto] = useState({
-    titulo: '',
-    descricao: '',
-    imagem_url: '',
-    link: ''
-  });
-  const [addLoading, setAddLoading] = useState(false);
-  const [addError, setAddError] = useState<string | null>(null);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editProjeto, setEditProjeto] = useState({
-    titulo: '',
-    descricao: '',
-    imagem_url: '',
-    link: ''
-  });
-  const [editLoading, setEditLoading] = useState(false);
-  const [editError, setEditError] = useState<string | null>(null);
+  const [setLoading] = useState(true);
   const [linguagensOpcoes, setLinguagensOpcoes] = useState<{ id: string, nome: string }[]>([]);
   const [categoriasOpcoes, setCategoriasOpcoes] = useState<{ id: string, nome: string }[]>([]);
-  const [loadingGlobal, setLoadingGlobal] = useState(false);
-  const [linguagensSelecionadas, setLinguagensSelecionadas] = useState<string[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>([]);
+  const [setLoadingGlobal] = useState(false);
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [setTotalPaginas] = useState(1);
   const projetosPorPagina = 9;
 
   useEffect(() => {
@@ -76,13 +40,6 @@ export function Projetos() {
     fetchTags().then(() => {
       setLoadingGlobal(false);
     });
-    supabase.auth.getUser().then(({ data }: { data: { user: any } }) => setUser(data.user));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setUser(session?.user ?? null);
-    });
-    return () => {
-      listener?.subscription.unsubscribe();
-    };
   }, []);
 
   useEffect(() => {

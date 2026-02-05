@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Facebook,
@@ -8,12 +7,7 @@ import {
   Github,
   Mail,
   Phone,
-  MapPin,
-  Globe,
-  Smartphone,
-  Cloud,
-  Code2,
-  MessageSquare
+  MapPin
 } from 'lucide-react';
 import logo from '../assets/logo-site-codepacce.png';
 

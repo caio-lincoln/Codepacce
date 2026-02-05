@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Send, X, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Send, X, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import OpenAI from 'openai';
 
 // Initialize the OpenAI API with your API key
