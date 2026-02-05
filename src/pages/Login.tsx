@@ -9,21 +9,40 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isMounted = useRef(true);
+
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     const email = `${username}@gmail.com`;
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    setLoading(false);
-    if (error) {
-      setError('Usuário ou senha inválidos.');
-    } else {
-      window.location.href = '/dashboard'; // Redireciona para a página de projetos
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (!isMounted.current) return;
+
+      if (error) {
+        setLoading(false);
+        setError('Usuário ou senha inválidos.');
+      } else {
+        window.location.href = '/dashboard';
+      }
+    } catch (err) {
+      if (isMounted.current) {
+        setLoading(false);
+        setError('Ocorreu um erro ao tentar entrar.');
+      }
     }
   };
 

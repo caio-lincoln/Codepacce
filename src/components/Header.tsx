@@ -15,11 +15,38 @@ export function Header() {
   }, [location]);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    let mounted = true;
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    async function getSession() {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (!mounted) return;
+        if (error) throw error;
+        setUser(data.user);
+      } catch (error: any) {
+        if (
+          error.name === 'AbortError' || 
+          signal.aborted || 
+          error.message?.includes('aborted') || 
+          error.code === 20 // DOMException.ABORT_ERR
+        ) return;
+        console.error('Error getting user:', error);
+      }
+    }
+
+    getSession();
+
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      if (mounted) {
+        setUser(session?.user ?? null);
+      }
     });
+
     return () => {
+      mounted = false;
+      abortController.abort();
       listener?.subscription.unsubscribe();
     };
   }, []);
@@ -65,7 +92,7 @@ export function Header() {
               Serviços
               <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
             </Link>
-            <Link to="/portfolio" className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group font-display tracking-wide">
+            <Link to="/cases" className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group font-display tracking-wide">
               Cases
               <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
             </Link>
@@ -148,7 +175,7 @@ export function Header() {
             Serviços
           </Link>
           <Link 
-            to="/portfolio" 
+            to="/cases" 
             className="text-3xl font-bold hover:text-blue-500 transition-colors font-display tracking-tight"
             onClick={() => setIsMenuOpen(false)}
           >

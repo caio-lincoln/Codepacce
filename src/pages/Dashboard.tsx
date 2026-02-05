@@ -52,11 +52,25 @@ export function Dashboard() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
   const projetosPorPagina = 9;
+  
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (isMounted.current) setUser(data.user);
+    }).catch(() => {});
+
     setLoadingGlobal(true);
-    fetchTags().then(() => setLoadingGlobal(false));
+    fetchTags().then(() => {
+      if (isMounted.current) setLoadingGlobal(false);
+    });
   }, []);
 
   useEffect(() => {
@@ -81,33 +95,78 @@ export function Dashboard() {
   }, [projetos]);
 
   // Buscar projetos ao carregar e após upload
-  async function fetchProjetos() {
+  useEffect(() => {
+    let mounted = true;
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    fetchProjetos(signal, mounted);
+
+    return () => {
+      mounted = false;
+      abortController.abort();
+    };
+  }, [linguagensOpcoes, categoriasOpcoes, projetosPorPagina]); // Dependências do fetch
+
+  async function fetchProjetos(signal?: AbortSignal, mounted: boolean = true) {
+    if (!mounted) return;
     setLoadingProjetos(true);
-    // Buscar todos os projetos (sem range)
-    const { data: projetosData, error } = await supabase
-      .from('projetos')
-      .select('*')
-      .order('criado_em', { ascending: false });
-    if (error || !projetosData) {
-      setProjetos([]);
-      setLoadingProjetos(false);
-      return;
+    
+    try {
+      // Buscar todos os projetos (sem range)
+      const { data: projetosData, error } = await supabase
+        .from('projetos')
+        .select('*')
+        .order('criado_em', { ascending: false })
+        .abortSignal(signal || new AbortController().signal);
+
+      if (!mounted) return;
+
+      if (error) throw error;
+      
+      if (!projetosData) {
+        setProjetos([]);
+        setLoadingProjetos(false);
+        return;
+      }
+      // Buscar relacionamentos
+      const { data: relLinguagens, error: relLinguagensError } = await supabase
+        .from('projeto_linguagem')
+        .select('projeto_id, linguagem_id')
+        .abortSignal(signal || new AbortController().signal);
+        
+      if (relLinguagensError) throw relLinguagensError;
+
+      const { data: relCategorias, error: relCategoriasError } = await supabase
+        .from('projeto_categoria')
+        .select('projeto_id, categoria_id')
+        .abortSignal(signal || new AbortController().signal);
+
+      if (relCategoriasError) throw relCategoriasError;
+
+      if (!mounted) return;
+
+      const projetosComTags = projetosData.map(proj => {
+        const linguagensIds = relLinguagens?.filter(r => r.projeto_id === proj.id).map(r => r.linguagem_id) || [];
+        const categoriasIds = relCategorias?.filter(r => r.projeto_id === proj.id).map(r => r.categoria_id) || [];
+        return {
+          ...proj,
+          linguagens: linguagensOpcoes.filter(l => linguagensIds.includes(l.id)).map(l => l.nome),
+          categorias: categoriasOpcoes.filter(c => categoriasIds.includes(c.id)).map(c => c.nome),
+        };
+      });
+      setProjetos(projetosComTags);
+      setTotalPaginas(Math.max(1, Math.ceil(projetosComTags.length / projetosPorPagina)));
+    } catch (error: any) {
+      if (error.name === 'AbortError' || error.message?.includes('aborted')) {
+        return;
+      }
+      console.error('Erro ao buscar projetos:', error);
+    } finally {
+      if (mounted) {
+        setLoadingProjetos(false);
+      }
     }
-    // Buscar relacionamentos
-    const { data: relLinguagens } = await supabase.from('projeto_linguagem').select('projeto_id, linguagem_id');
-    const { data: relCategorias } = await supabase.from('projeto_categoria').select('projeto_id, categoria_id');
-    const projetosComTags = projetosData.map(proj => {
-      const linguagensIds = relLinguagens?.filter(r => r.projeto_id === proj.id).map(r => r.linguagem_id) || [];
-      const categoriasIds = relCategorias?.filter(r => r.projeto_id === proj.id).map(r => r.categoria_id) || [];
-      return {
-        ...proj,
-        linguagens: linguagensOpcoes.filter(l => linguagensIds.includes(l.id)).map(l => l.nome),
-        categorias: categoriasOpcoes.filter(c => categoriasIds.includes(c.id)).map(c => c.nome),
-      };
-    });
-    setProjetos(projetosComTags);
-    setTotalPaginas(Math.max(1, Math.ceil(projetosComTags.length / projetosPorPagina)));
-    setLoadingProjetos(false);
   }
 
   const handleLogout = async () => {
@@ -360,7 +419,9 @@ export function Dashboard() {
   // Mover fetchTags para dentro do componente para acessar os setters
   async function fetchTags() {
     const { data: langs } = await supabase.from('linguagens').select('id, nome').order('nome');
+    if (!isMounted.current) return;
     const { data: cats } = await supabase.from('categorias').select('id, nome').order('nome');
+    if (!isMounted.current) return;
     setLinguagensOpcoes(langs || []);
     setCategoriasOpcoes(cats || []);
   }

@@ -8,20 +8,39 @@ export default function Reset() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const isMounted = React.useRef(true);
+
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSuccess('');
     setError('');
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/reset-password',
-    });
-    setLoading(false);
-    if (error) {
-      setError('Erro ao enviar e-mail de recuperação. Verifique o e-mail informado.');
-    } else {
-      setSuccess('E-mail de recuperação enviado! Verifique sua caixa de entrada.');
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+      
+      if (!isMounted.current) return;
+
+      setLoading(false);
+      if (error) {
+        setError('Erro ao enviar e-mail de recuperação. Verifique o e-mail informado.');
+      } else {
+        setSuccess('E-mail de recuperação enviado! Verifique sua caixa de entrada.');
+      }
+    } catch (err: any) {
+      if (!isMounted.current) return;
+      if (err.name === 'AbortError' || err.message?.includes('aborted')) return;
+      setLoading(false);
+      setError('Ocorreu um erro inesperado.');
     }
   };
 

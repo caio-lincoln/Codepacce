@@ -216,6 +216,12 @@ export function Home() {
             muted
             playsInline
             className="w-full h-full object-cover opacity-50"
+            onError={(e) => {
+              // Ignorar erros de abortamento de carregamento de mídia ao trocar de rota
+              const target = e.target as HTMLVideoElement;
+              if (target.error?.code === MediaError.MEDIA_ERR_ABORTED) return;
+              // Opcional: tentar recarregar se for outro erro ou apenas ignorar
+            }}
           >
             <source src="/bg-banner-nano.mp4" type="video/mp4" />
           </video>
@@ -271,7 +277,7 @@ export function Home() {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link 
-              to="/portfolio" 
+              to="/cases" 
               className="px-8 py-4 rounded-full border border-white/10 hover:border-white/20 hover:bg-white/5 text-white font-medium transition-all duration-300 backdrop-blur-sm hover:scale-105 font-display"
             >
               Ver Cases

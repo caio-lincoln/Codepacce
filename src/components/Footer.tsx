@@ -114,7 +114,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/portfolio" className="text-gray-400 hover:text-white transition-colors block hover:translate-x-1 duration-300">
+                <Link to="/cases" className="text-gray-400 hover:text-white transition-colors block hover:translate-x-1 duration-300">
                   Cases
                 </Link>
               </li>

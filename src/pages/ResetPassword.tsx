@@ -10,6 +10,14 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const isMounted = React.useRef(true);
+
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,13 +32,26 @@ export default function ResetPassword() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setLoading(false);
-    if (error) {
-      setError('Erro ao redefinir a senha. O link pode ter expirado ou já ter sido usado.');
-    } else {
-      setSuccess('Senha redefinida com sucesso! Você pode fazer login com a nova senha.');
-      setTimeout(() => navigate('/login'), 2500);
+    
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      
+      if (!isMounted.current) return;
+      
+      setLoading(false);
+      if (error) {
+        setError('Erro ao redefinir a senha. O link pode ter expirado ou já ter sido usado.');
+      } else {
+        setSuccess('Senha redefinida com sucesso! Você pode fazer login com a nova senha.');
+        setTimeout(() => {
+          if (isMounted.current) navigate('/login');
+        }, 2500);
+      }
+    } catch (err: any) {
+      if (!isMounted.current) return;
+      if (err.name === 'AbortError' || err.message?.includes('aborted')) return;
+      setLoading(false);
+      setError('Ocorreu um erro inesperado.');
     }
   };
 

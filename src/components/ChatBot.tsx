@@ -147,6 +147,14 @@ export function ChatBot() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -208,8 +216,14 @@ export function ChatBot() {
 
       const responseText = response.choices[0]?.message?.content || "Desculpe, não consegui gerar uma resposta.";
       
-      setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
-    } catch (error) {
+      if (isMounted.current) {
+        setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
+      }
+    } catch (error: any) {
+      if (!isMounted.current) return;
+      // Ignore abort errors
+      if (error.name === 'AbortError' || error.message?.includes('aborted')) return;
+      
       console.error("Error generating response:", error);
       setMessages(prev => [
         ...prev, 
@@ -219,7 +233,9 @@ export function ChatBot() {
         }
       ]);
     } finally {
-      setIsLoading(false);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
     }
   };
 

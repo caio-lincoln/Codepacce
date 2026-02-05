@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import emailjs from '@emailjs/browser';
 import {
@@ -55,6 +55,16 @@ export function Contato() {
     error: ''
   });
 
+  // Ref para rastrear se o componente está montado
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const handleNext = () => {
     if (step === 1) {
       if (!formData.name || !formData.email || !formData.phone) return;
@@ -72,6 +82,7 @@ export function Contato() {
   };
 
   const handleBookMeeting = async () => {
+    if (!isMounted.current) return;
     setFormStatus({ loading: true, success: false, error: '' });
 
     try {
@@ -93,9 +104,15 @@ export function Contato() {
         EMAILJS_PUBLIC_KEY
       );
 
-      setFormStatus({ loading: false, success: true, error: '' });
-      setStep(3);
-    } catch (error) {
+      if (isMounted.current) {
+        setFormStatus({ loading: false, success: true, error: '' });
+        setStep(3);
+      }
+    } catch (error: any) {
+      if (!isMounted.current) return;
+      // Ignorar erros de abortamento
+      if (error.name === 'AbortError' || error.message?.includes('aborted')) return;
+      
       console.error('Error sending email:', error);
       setFormStatus({ loading: false, success: false, error: 'Erro ao agendar. Tente novamente.' });
     }
