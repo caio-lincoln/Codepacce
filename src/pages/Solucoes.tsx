@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -96,7 +95,7 @@ export function Solucoes() {
     <div className="pt-32 pb-20 overflow-hidden">
       {/* Background Elements */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('/noise.svg')] opacity-[0.03]" />
         <div className="absolute top-40 left-20 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
         <div className="absolute bottom-40 right-20 w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[120px] -z-10" />
       </div>

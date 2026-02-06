@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -7,9 +7,6 @@ import {
   Cloud,
   Layout,
   Smartphone,
-  Server,
-  Shield,
-  Cpu,
   Zap,
   Globe,
   Braces,
@@ -852,7 +849,7 @@ export function Tecnologias() {
     <div className="pt-32 pb-20 overflow-hidden min-h-screen">
       {/* Background Elements */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('/noise.svg')] opacity-[0.03]" />
         <div className="absolute top-20 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] -z-10" />
       </div>

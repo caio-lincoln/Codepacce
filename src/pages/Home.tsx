@@ -1,31 +1,16 @@
-import React, { useRef } from 'react';
+import { useRef, useState, useEffect, createElement } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView, animate } from 'framer-motion';
 import {
-  Globe,
   Smartphone,
   Cloud,
-  Code2,
-  Database,
-  Shield,
-  BarChart,
-  Settings,
-  Users,
-  Zap,
-  Cpu,
   Layout,
   Server,
   ArrowRight,
-  Terminal,
   CheckCircle,
-  Code,
-  Search,
-  Compass,
-  Rocket,
-  FileSearch,
-  Layers,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Code
 } from 'lucide-react';
 import { PiBinoculars, PiStrategy, PiRocketLaunch, PiTrendUp, PiBrain, PiLightbulb, PiDesktop, PiDeviceMobile, PiWrench, PiUsersThree, PiShoppingCart, PiClock, PiCurrencyDollar, PiCheckSquare } from 'react-icons/pi';
 export function Home() {
@@ -76,7 +61,7 @@ export function Home() {
     }
   ];
 
-  const [currentService, setCurrentService] = React.useState(0);
+  const [currentService, setCurrentService] = useState(0);
 
   const nextService = () => {
     setCurrentService((prev) => (prev + 1) % services.length);
@@ -90,7 +75,7 @@ export function Home() {
     const nodeRef = useRef<HTMLSpanElement>(null);
     const inView = useInView(nodeRef, { once: true, margin: "-50px" });
     
-    React.useEffect(() => {
+    useEffect(() => {
       const node = nodeRef.current;
       if (!node || !inView) return;
 
@@ -209,13 +194,13 @@ export function Home() {
         {/* Background Video */}
         <div className="absolute inset-0 w-full h-full z-0">
           <div className="absolute inset-0 bg-black/60 z-10"></div>
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 z-10 mix-blend-overlay"></div>
+          <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-20 z-10 mix-blend-overlay"></div>
           <video
             autoPlay
             loop
             muted
             playsInline
-            className="w-full h-full object-cover opacity-50"
+            className="w-full h-full object-cover opacity-50 bg-black"
           >
             <source src="/bg-banner-nano.mp4" type="video/mp4" />
           </video>
@@ -344,15 +329,11 @@ export function Home() {
               >
                 <div className="w-24 h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center relative z-10 transition-all duration-500 group-hover:scale-110 group-hover:bg-blue-500/10 group-hover:border-blue-500/20 shadow-2xl backdrop-blur-md">
                   <div className="absolute inset-0 bg-blue-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-                  {step.image ? (
-                    <img 
-                      src={step.image} 
-                      alt={step.title} 
-                      className="w-10 h-10 object-contain relative z-10"
-                    />
-                  ) : (
-                    <step.icon className="w-10 h-10 text-white relative z-10 group-hover:text-blue-400 transition-colors" strokeWidth={1.5} />
-                  )}
+                  <img 
+                    src={step.image} 
+                    alt={step.title} 
+                    className="w-10 h-10 object-contain relative z-10"
+                  />
                 </div>
               </motion.div>
 
@@ -468,7 +449,7 @@ export function Home() {
                 <div className="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full"></div>
                 {/* 3D-like Icon Container */}
                 <div className="relative w-72 h-72 md:w-96 md:h-96 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 backdrop-blur-xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-500 group">
-                  {React.createElement(services[currentService].icon, {
+                  {createElement(services[currentService].icon, {
                     className: "w-32 h-32 text-blue-500/80 drop-shadow-[0_0_15px_rgba(59,130,246,0.3)] group-hover:text-blue-400 group-hover:drop-shadow-[0_0_30px_rgba(59,130,246,0.6)] transition-all duration-500"
                   })}
                   
