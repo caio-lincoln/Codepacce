@@ -1,14 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, X, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
-import OpenAI from 'openai';
-
-// Initialize the OpenAI API with your API key
-// Note: dangerouslyAllowBrowser: true is required for client-side usage,
-// but it is not recommended for production environments.
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
+import { useIsMounted } from '../hooks/useIsMounted';
+import { supabase } from '../supabaseClient';
 
 // Company information for the AI to use
 const COMPANY_INFO = `
@@ -147,6 +140,7 @@ export function ChatBot() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMounted = useIsMounted();
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -196,20 +190,25 @@ export function ChatBot() {
         userMessage
       ];
       
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo", // or "gpt-4" if preferred/available
-        messages: history.map(msg => ({
-          role: msg.role,
-          content: msg.content
-        })),
-        temperature: 0.7,
-        max_tokens: 1024,
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: { messages: history }
       });
 
-      const responseText = response.choices[0]?.message?.content || "Desculpe, não consegui gerar uma resposta.";
+      if (error) throw error;
+
+      const responseText = data.reply || "Desculpe, não consegui gerar uma resposta.";
       
-      setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
-    } catch (error) {
+      if (isMounted()) {
+        setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
+      }
+    } catch (error: unknown) {
+      if (!isMounted()) return;
+      // Ignore abort errors
+      if (
+        error instanceof Error && 
+        (error.name === 'AbortError' || error.message?.includes('aborted'))
+      ) return;
+      
       console.error("Error generating response:", error);
       setMessages(prev => [
         ...prev, 
@@ -219,7 +218,9 @@ export function ChatBot() {
         }
       ]);
     } finally {
-      setIsLoading(false);
+      if (isMounted()) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -234,6 +235,7 @@ export function ChatBot() {
         <img 
           src="/logo code azul.jpeg" 
           alt="Chat" 
+          loading="lazy"
           className="w-full h-full object-cover"
         />
       </button>

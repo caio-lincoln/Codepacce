@@ -1,26 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { supabase } from '../supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight,
   ExternalLink,
   X,
   Code,
-  Calendar
+  Calendar,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
-
-type Projeto = {
-  id: string;
-  titulo: string;
-  descricao: string;
-  imagem_url?: string;
-  link?: string;
-  criado_em: string;
-  criado_por: string;
-  linguagens?: string[];
-  categorias?: string[];
-};
+import { projectsService, Projeto } from '../services/projectsService';
+import { PageBackground, PageHero, CTASection } from '../components/PageLayoutComponents';
 
 export function Projetos() {
   const [activeFilter, setActiveFilter] = useState('todos');
@@ -31,30 +21,47 @@ export function Projetos() {
   const [linguagensOpcoes, setLinguagensOpcoes] = useState<{ id: string, nome: string }[]>([]);
   const [categoriasOpcoes, setCategoriasOpcoes] = useState<{ id: string, nome: string }[]>([]);
   const [loadingGlobal, setLoadingGlobal] = useState(false);
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const [totalPaginas, setTotalPaginas] = useState(1);
-  const projetosPorPagina = 9;
+  const [error, setError] = useState<string | null>(null);
+
+  // Pagination Configuration
+  const ITEMS_PER_PAGE = 9;
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    setLoadingGlobal(true);
-    fetchTags().then(() => {
-      setLoadingGlobal(false);
-    });
+    let mounted = true;
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    async function loadData() {
+      setLoadingGlobal(true);
+      setError(null);
+      try {
+        const [loadedProjects, loadedCats] = await Promise.all([
+          projectsService.getAllProjects(signal),
+          projectsService.getCategories(signal)
+        ]);
+        
+        if (!mounted) return;
+
+        setAllProjects(loadedProjects);
+        setProjects(loadedProjects);
+        setCategoriasOpcoes(loadedCats);
+      } catch (error: unknown) {
+        if (error instanceof Error && (error.name === 'AbortError' || signal.aborted)) return;
+        console.error('Falha ao carregar dados:', error);
+        if (mounted) setError('Falha ao carregar projetos. Por favor, tente novamente.');
+      } finally {
+        if (mounted) setLoadingGlobal(false);
+      }
+    }
+
+    loadData();
+
+    return () => {
+      mounted = false;
+      abortController.abort();
+    };
   }, []);
-
-  useEffect(() => {
-    if (linguagensOpcoes.length > 0 && categoriasOpcoes.length > 0) {
-      fetchProjetosComTags();
-    }
-    // eslint-disable-next-line
-  }, [linguagensOpcoes, categoriasOpcoes]);
-
-  useEffect(() => {
-    if (paginaAtual !== 1) {
-      setPaginaAtual(1);
-    }
-    // eslint-disable-next-line
-  }, [activeFilter]);
 
   useEffect(() => {
     // Filtrar projetos
@@ -62,33 +69,24 @@ export function Projetos() {
       ? allProjects
       : allProjects.filter(project => project.categorias?.map(cat => cat.toLowerCase()).includes(activeFilter));
 
-    // Calcular total de páginas com base nos resultados filtrados
-    const novoTotalPaginas = Math.max(1, Math.ceil(filtered.length / projetosPorPagina));
-    setTotalPaginas(novoTotalPaginas);
+    // Exibir todos os projetos filtrados sem paginação
+    setProjects(filtered);
+    setCurrentPage(1); // Resetar para primeira página ao filtrar
+  }, [allProjects, activeFilter]);
 
-    // Se a página atual for maior que o novo total de páginas, ajustar para a última página
-    if (paginaAtual > novoTotalPaginas) {
-      setPaginaAtual(novoTotalPaginas);
+  // Pagination Logic
+  const totalPages = Math.ceil(projects.length / ITEMS_PER_PAGE);
+  const currentProjects = projects.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      document.getElementById('projetos-grid')?.scrollIntoView({ behavior: 'smooth' });
     }
-
-    // Paginar
-    const from = (paginaAtual - 1) * projetosPorPagina;
-    const to = from + projetosPorPagina;
-    setProjects(filtered.slice(from, to));
-  }, [allProjects, activeFilter, paginaAtual, projetosPorPagina]);
-
-  useEffect(() => {
-    const filtros = document.getElementById('projetos-filtros');
-    const header = document.querySelector('header');
-    const headerHeight = header ? header.offsetHeight : 80;
-
-    if (filtros) {
-      const y = filtros.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [paginaAtual]);
+  };
 
   const categories = [
     { id: 'todos', label: 'Todos' },
@@ -105,76 +103,18 @@ export function Projetos() {
     document.body.style.overflow = 'unset';
   };
 
-  async function fetchTags() {
-    const { data: langs } = await supabase.from('linguagens').select('id, nome').order('nome');
-    const { data: cats } = await supabase.from('categorias').select('id, nome').order('nome');
-    setLinguagensOpcoes(langs || []);
-    setCategoriasOpcoes(cats || []);
-  }
-
-  async function fetchProjetosComTags() {
-    setLoading(true);
-    const { count } = await supabase.from('projetos').select('*', { count: 'exact', head: true });
-    setTotalPaginas(Math.max(1, Math.ceil((count || 0) / projetosPorPagina)));
-    
-    const { data: projetosData, error } = await supabase
-      .from('projetos')
-      .select('*')
-      .order('criado_em', { ascending: false });
-      
-    if (error || !projetosData) {
-      setProjects([]);
-      setLoading(false);
-      return;
-    }
-    
-    const { data: relLinguagens } = await supabase.from('projeto_linguagem').select('projeto_id, linguagem_id');
-    const { data: relCategorias } = await supabase.from('projeto_categoria').select('projeto_id, categoria_id');
-    
-    const projetosComTags = projetosData.map(proj => {
-      const linguagensIds = relLinguagens?.filter(r => r.projeto_id === proj.id).map(r => r.linguagem_id) || [];
-      const categoriasIds = relCategorias?.filter(r => r.projeto_id === proj.id).map(r => r.categoria_id) || [];
-      return {
-        ...proj,
-        linguagens: linguagensOpcoes.filter(l => linguagensIds.includes(l.id)).map(l => l.nome),
-        categorias: categoriasOpcoes.filter(c => categoriasIds.includes(c.id)).map(c => c.nome),
-      };
-    });
-    
-    setProjects(projetosComTags);
-    setAllProjects(projetosComTags);
-    setLoading(false);
-  }
-
   return (
     <div className="pt-32 pb-20 overflow-hidden min-h-screen">
-      {/* Background Elements */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('/noise.svg')] opacity-[0.03]" />
-        <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] -z-10" />
-      </div>
+      <PageBackground />
 
-      {/* Hero */}
-      <section className="container mx-auto px-4 mb-20 relative z-10">
-        <div className="text-center max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-400 text-sm mb-6 backdrop-blur-sm tracking-wide">
-              Cases
-            </span>
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 font-display tracking-tight text-white">
-              Nossas <span className="text-blue-500">Obras Primas</span>
-            </h1>
-            <p className="text-gray-400 text-xl font-light leading-relaxed max-w-2xl mx-auto font-sans">
-              Explore nossa galeria de projetos e descubra como transformamos desafios complexos em soluções digitais elegantes.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        title={
+          <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
+            Nossos Projetos
+          </span>
+        }
+        description="Conheça algumas das soluções que desenvolvemos para transformar a realidade de nossos clientes."
+      />
 
       {/* Filters */}
       <section id="projetos-filtros" className="container mx-auto px-4 mb-16 relative z-10">
@@ -203,11 +143,21 @@ export function Projetos() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
           </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+            <div className="text-red-400 mb-4 text-xl">{error}</div>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-6 py-2 bg-red-500/10 border border-red-500/20 rounded-full text-red-400 hover:bg-red-500/20 transition-colors"
+            >
+              Recarregar página
+            </button>
+          </div>
         ) : (
           <>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               <AnimatePresence mode='popLayout'>
-                {projects.map((project, index) => (
+                {currentProjects.map((project, index) => (
                   <motion.div
                     layout
                     key={project.id}
@@ -227,6 +177,7 @@ export function Projetos() {
                           transition={{ duration: 0.5 }}
                           src={project.imagem_url}
                           alt={project.titulo}
+                          loading="lazy"
                           className="relative z-10 max-h-full max-w-full object-contain drop-shadow-2xl"
                         />
                       ) : (
@@ -268,37 +219,37 @@ export function Projetos() {
               </AnimatePresence>
             </div>
 
-            {/* Pagination */}
-            {totalPaginas > 1 && (
-              <div className="flex justify-center mt-16 gap-3">
-                <button 
-                  onClick={() => setPaginaAtual(p => Math.max(1, p - 1))} 
-                  disabled={paginaAtual === 1} 
-                  className="px-6 py-3 rounded-full bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-all font-display"
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-16">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Anterior
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
-                <div className="flex gap-2">
-                  {[...Array(totalPaginas)].map((_, idx) => (
-                    <button 
-                      key={idx} 
-                      onClick={() => setPaginaAtual(idx + 1)} 
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-display transition-all ${
-                        paginaAtual === idx + 1 
-                          ? 'bg-blue-500 text-white shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]' 
-                          : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10 hover:text-white'
-                      }`}
-                    >
-                      {idx + 1}
-                    </button>
-                  ))}
-                </div>
-                <button 
-                  onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))} 
-                  disabled={paginaAtual === totalPaginas} 
-                  className="px-6 py-3 rounded-full bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-all font-display"
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-300 border ${
+                      currentPage === page
+                        ? 'bg-blue-500 border-blue-500 text-white shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]'
+                        : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/20 hover:text-white'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Próxima
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             )}
@@ -412,32 +363,12 @@ export function Projetos() {
       </AnimatePresence>
 
       {/* CTA */}
-      <section className="container mx-auto px-4 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="relative rounded-[2.5rem] overflow-hidden border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-12 md:p-20 text-center group"
-        >
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[300px] bg-blue-500/10 blur-[100px] rounded-full -mt-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-          
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 font-display text-white">
-              Gostou do que viu?
-            </h2>
-            <p className="text-gray-400 text-lg mb-10 font-light leading-relaxed">
-              Vamos criar o próximo case de sucesso da sua empresa.
-            </p>
-            <Link 
-              to="/contato" 
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-black font-medium hover:scale-105 transition-all duration-300 group"
-            >
-              <span className="font-display">Iniciar Projeto</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-        </motion.div>
-      </section>
+      <CTASection
+        title="Gostou do que viu?"
+        description="Vamos criar o próximo case de sucesso da sua empresa."
+        buttonText="Iniciar Projeto"
+        buttonLink="/contato"
+      />
     </div>
   );
 }

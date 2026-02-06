@@ -1,37 +1,31 @@
 import { useNavigate } from 'react-router-dom';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
-import { LogOut, Home, Folder, BarChart2, FolderOpen } from 'lucide-react';
+import { User } from '@supabase/supabase-js';
+import { Folder, BarChart2, FolderOpen, LogOut } from 'lucide-react';
+import { useIsMounted } from '../hooks/useIsMounted';
+import { Projeto } from '../services/projectsService';
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [stats, setStats] = useState({ total: 0, ultimo: null });
+  const [user, setUser] = useState<User | null>(null);
+  const [stats, setStats] = useState<{ total: number; ultimo: string | null }>({ total: 0, ultimo: null });
   // States para formulário de upload
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [link, setLink] = useState('');
   const [linguagens, setLinguagens] = useState<string[]>([]);
   const [categorias, setCategorias] = useState<string[]>([]);
-  const [linguagemInput, setLinguagemInput] = useState('');
-  const [categoriaInput, setCategoriaInput] = useState('');
   const [imagemFile, setImagemFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // State para lista de projetos
-  const [projetos, setProjetos] = useState<any[]>([]);
+  const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [loadingProjetos, setLoadingProjetos] = useState(true);
-  // States para edição inline
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editProjeto, setEditProjeto] = useState<any>(null);
-  const [editImagemFile, setEditImagemFile] = useState<File | null>(null);
-  const [editLoading, setEditLoading] = useState(false);
-  const [editError, setEditError] = useState<string | null>(null);
-  const editFileInputRef = useRef<HTMLInputElement>(null);
+  
   // State para abas
   const [aba, setAba] = useState<'portfolio' | 'estatisticas' | 'tags'>('portfolio');
-  const [activeFilter, setActiveFilter] = useState('todos');
   const [linguagensOpcoes, setLinguagensOpcoes] = useState<{ id: string, nome: string }[]>([]);
   const [categoriasOpcoes, setCategoriasOpcoes] = useState<{ id: string, nome: string }[]>([]);
   // Estados para CRUD de tags
@@ -42,7 +36,7 @@ export function Dashboard() {
   const [editCategoriaId, setEditCategoriaId] = useState<string | null>(null);
   const [editCategoriaNome, setEditCategoriaNome] = useState('');
   // Novo estado para modal de edição
-  const [modalProjeto, setModalProjeto] = useState<any>(null);
+  const [modalProjeto, setModalProjeto] = useState<Projeto | null>(null);
   const [modalEditLoading, setModalEditLoading] = useState(false);
   const [modalEditError, setModalEditError] = useState<string | null>(null);
   // Novo estado para arquivo de imagem no modal
@@ -52,18 +46,26 @@ export function Dashboard() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
   const projetosPorPagina = 9;
+  
+  const isMounted = useIsMounted();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getUser().then(({ data }) => {
+      if (isMounted()) setUser(data.user);
+    }).catch(() => {});
+
     setLoadingGlobal(true);
-    fetchTags().then(() => setLoadingGlobal(false));
-  }, []);
+    fetchTags().then(() => {
+      if (isMounted()) setLoadingGlobal(false);
+    });
+  }, [fetchTags, isMounted]);
+
 
   useEffect(() => {
     if (linguagensOpcoes.length > 0 && categoriasOpcoes.length > 0) {
       fetchProjetos();
     }
-  }, [paginaAtual, linguagensOpcoes, categoriasOpcoes]);
+  }, [paginaAtual, linguagensOpcoes, categoriasOpcoes, fetchProjetos]);
 
   // Atualizar estatísticas sempre que a lista de projetos mudar
   useEffect(() => {
@@ -73,7 +75,7 @@ export function Dashboard() {
     }
     const total = projetos.length;
     // Encontrar o projeto mais recente
-    const ultimoProjeto = projetos.reduce((maisRecente, atual) => {
+    const ultimoProjeto = projetos.reduce<Projeto | null>((maisRecente, atual) => {
       if (!maisRecente) return atual;
       return new Date(atual.criado_em) > new Date(maisRecente.criado_em) ? atual : maisRecente;
     }, null);
@@ -81,63 +83,87 @@ export function Dashboard() {
   }, [projetos]);
 
   // Buscar projetos ao carregar e após upload
-  async function fetchProjetos() {
+  useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    fetchProjetos(signal);
+
+    return () => {
+      abortController.abort();
+    };
+  }, [fetchProjetos]); // Dependências do fetch
+
+  const fetchProjetos = useCallback(async (signal?: AbortSignal) => {
+    if (!isMounted()) return;
     setLoadingProjetos(true);
-    // Buscar todos os projetos (sem range)
-    const { data: projetosData, error } = await supabase
-      .from('projetos')
-      .select('*')
-      .order('criado_em', { ascending: false });
-    if (error || !projetosData) {
-      setProjetos([]);
-      setLoadingProjetos(false);
-      return;
+    
+    try {
+      // Buscar todos os projetos (sem range)
+      const { data: projetosData, error } = await supabase
+        .from('projetos')
+        .select('*')
+        .order('criado_em', { ascending: false })
+        .abortSignal(signal || new AbortController().signal);
+
+      if (!isMounted()) return;
+
+      if (error) throw error;
+      
+      if (!projetosData) {
+        setProjetos([]);
+        setLoadingProjetos(false);
+        return;
+      }
+      // Buscar relacionamentos
+      const { data: relLinguagens, error: relLinguagensError } = await supabase
+        .from('projeto_linguagem')
+        .select('projeto_id, linguagem_id')
+        .abortSignal(signal || new AbortController().signal);
+        
+      if (relLinguagensError) throw relLinguagensError;
+
+      const { data: relCategorias, error: relCategoriasError } = await supabase
+        .from('projeto_categoria')
+        .select('projeto_id, categoria_id')
+        .abortSignal(signal || new AbortController().signal);
+
+      if (relCategoriasError) throw relCategoriasError;
+
+      if (!isMounted()) return;
+
+      const projetosComTags = projetosData.map(proj => {
+        const linguagensIds = relLinguagens?.filter(r => r.projeto_id === proj.id).map(r => r.linguagem_id) || [];
+        const categoriasIds = relCategorias?.filter(r => r.projeto_id === proj.id).map(r => r.categoria_id) || [];
+        return {
+          ...proj,
+          linguagens: linguagensOpcoes.filter(l => linguagensIds.includes(l.id)).map(l => l.nome),
+          categorias: categoriasOpcoes.filter(c => categoriasIds.includes(c.id)).map(c => c.nome),
+        };
+      });
+      setProjetos(projetosComTags);
+      setTotalPaginas(Math.max(1, Math.ceil(projetosComTags.length / projetosPorPagina)));
+    } catch (error: unknown) {
+      if (
+        error instanceof Error && 
+        (error.name === 'AbortError' || error.message?.includes('aborted'))
+      ) {
+        return;
+      }
+      console.error('Erro ao buscar projetos:', error);
+    } finally {
+      if (isMounted()) {
+        setLoadingProjetos(false);
+      }
     }
-    // Buscar relacionamentos
-    const { data: relLinguagens } = await supabase.from('projeto_linguagem').select('projeto_id, linguagem_id');
-    const { data: relCategorias } = await supabase.from('projeto_categoria').select('projeto_id, categoria_id');
-    const projetosComTags = projetosData.map(proj => {
-      const linguagensIds = relLinguagens?.filter(r => r.projeto_id === proj.id).map(r => r.linguagem_id) || [];
-      const categoriasIds = relCategorias?.filter(r => r.projeto_id === proj.id).map(r => r.categoria_id) || [];
-      return {
-        ...proj,
-        linguagens: linguagensOpcoes.filter(l => linguagensIds.includes(l.id)).map(l => l.nome),
-        categorias: categoriasOpcoes.filter(c => categoriasIds.includes(c.id)).map(c => c.nome),
-      };
-    });
-    setProjetos(projetosComTags);
-    setTotalPaginas(Math.max(1, Math.ceil(projetosComTags.length / projetosPorPagina)));
-    setLoadingProjetos(false);
-  }
+  }, [isMounted, linguagensOpcoes, categoriasOpcoes, projetosPorPagina]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/login');
   };
 
-  // Helpers para adicionar/remover tags
-  function addLinguagem(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter' && linguagemInput.trim()) {
-      setLinguagens([...linguagens, linguagemInput.trim()]);
-      setLinguagemInput('');
-      e.preventDefault();
-    }
-  }
-  function removeLinguagem(idx: number) {
-    setLinguagens(linguagens.filter((_, i) => i !== idx));
-  }
-  function addCategoria(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter' && categoriaInput.trim()) {
-      setCategorias([...categorias, categoriaInput.trim()]);
-      setCategoriaInput('');
-      e.preventDefault();
-    }
-  }
-  function removeCategoria(idx: number) {
-    setCategorias(categorias.filter((_, i) => i !== idx));
-  }
-
-  // Adicionar helpers para buscar ids das linguagens/categorias selecionadas
+  // Helper para buscar ids das linguagens/categorias selecionadas
   function getIdsFromNomes(nomes: string[], opcoes: { id: string, nome: string }[]) {
     return nomes.map(nome => opcoes.find(o => o.nome === nome)?.id).filter(Boolean);
   }
@@ -149,7 +175,7 @@ export function Dashboard() {
     let imagem_url = '';
     if (imagemFile) {
       const fileExt = imagemFile.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 8)}.${fileExt}`;
+      const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}.${fileExt}`;
       const { error } = await supabase.storage.from('portfolio').upload(fileName, imagemFile);
       if (error) {
         setUploadError('Erro ao fazer upload da imagem.');
@@ -162,6 +188,11 @@ export function Dashboard() {
     const linguagensIds = getIdsFromNomes(linguagens, linguagensOpcoes);
     const categoriasIds = getIdsFromNomes(categorias, categoriasOpcoes);
     // Salvar projeto sem linguagens/categorias
+    if (!user) {
+        setUploadError('Usuário não autenticado.');
+        setUploading(false);
+        return;
+    }
     const { data, error } = await supabase.from('projetos').insert({
       titulo,
       descricao,
@@ -203,6 +234,12 @@ export function Dashboard() {
     fetchProjetos();
   }
 
+  /* 
+   * Funções de edição removidas se não forem utilizadas. 
+   * Caso queira implementar edição no futuro, descomente e ajuste.
+   */
+  
+  /*
   function handleEditProjeto(id: string) {
     const projeto = projetos.find(p => p.id === id);
     setEditId(id);
@@ -219,7 +256,7 @@ export function Dashboard() {
   async function handleSaveEdit(id: string) {
     setEditLoading(true);
     setEditError(null);
-    let imagem_url = editProjeto.imagem_url;
+    let imagem_url = editProjeto?.imagem_url || '';
     if (editImagemFile) {
       const fileExt = editImagemFile.name.split('.').pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 8)}.${fileExt}`;
@@ -233,9 +270,9 @@ export function Dashboard() {
     }
     // Atualizar projeto (exceto linguagens/categorias)
     const { error } = await supabase.from('projetos').update({
-      titulo: editProjeto.titulo,
-      descricao: editProjeto.descricao,
-      link: editProjeto.link,
+      titulo: editProjeto?.titulo,
+      descricao: editProjeto?.descricao,
+      link: editProjeto?.link,
       imagem_url
     }).eq('id', id);
     if (error) {
@@ -246,13 +283,15 @@ export function Dashboard() {
     // Atualizar relacionamentos: remover todos e inserir os novos
     await supabase.from('projeto_linguagem').delete().eq('projeto_id', id);
     await supabase.from('projeto_categoria').delete().eq('projeto_id', id);
-    const linguagensIds = getIdsFromNomes(editProjeto.linguagens, linguagensOpcoes);
-    for (const linguagem_id of linguagensIds) {
-      await supabase.from('projeto_linguagem').insert({ projeto_id: id, linguagem_id });
-    }
-    const categoriasIds = getIdsFromNomes(editProjeto.categorias, categoriasOpcoes);
-    for (const categoria_id of categoriasIds) {
-      await supabase.from('projeto_categoria').insert({ projeto_id: id, categoria_id });
+    if (editProjeto) {
+      const linguagensIds = getIdsFromNomes(editProjeto.linguagens, linguagensOpcoes);
+      const categoriasIds = getIdsFromNomes(editProjeto.categorias, categoriasOpcoes);
+      for (const linguagem_id of linguagensIds) {
+        await supabase.from('projeto_linguagem').insert({ projeto_id: id, linguagem_id });
+      }
+      for (const categoria_id of categoriasIds) {
+        await supabase.from('projeto_categoria').insert({ projeto_id: id, categoria_id });
+      }
     }
     setEditLoading(false);
     setEditId(null);
@@ -260,6 +299,9 @@ export function Dashboard() {
     setEditImagemFile(null);
     fetchProjetos();
   }
+  */
+
+  // --- Funções CRUD de Tags (Linguagens/Categorias) ---
 
   // Placeholders para editar/remover
   async function handleRemoverProjeto(id: string) {
@@ -293,10 +335,6 @@ export function Dashboard() {
       });
     }
   }
-
-  const filteredProjects = activeFilter === 'todos'
-    ? projetos
-    : projetos.filter(project => project.categorias?.includes(activeFilter));
 
   // Funções CRUD linguagens
   async function adicionarLinguagem() {
@@ -357,15 +395,16 @@ export function Dashboard() {
     setEditCategoriaNome('');
   }
 
-  // Mover fetchTags para dentro do componente para acessar os setters
-  async function fetchTags() {
+  const fetchTags = useCallback(async () => {
     const { data: langs } = await supabase.from('linguagens').select('id, nome').order('nome');
+    if (!isMounted()) return;
     const { data: cats } = await supabase.from('categorias').select('id, nome').order('nome');
+    if (!isMounted()) return;
     setLinguagensOpcoes(langs || []);
     setCategoriasOpcoes(cats || []);
-  }
+  }, [isMounted]);
 
-  function openModalProjeto(proj: any) {
+  function openModalProjeto(proj: Projeto) {
     setModalProjeto({ ...proj });
     setModalEditError(null);
   }
@@ -374,12 +413,13 @@ export function Dashboard() {
     setModalEditError(null);
   }
   async function salvarModalProjeto() {
+    if (!modalProjeto) return;
     setModalEditLoading(true);
     setModalEditError(null);
     let imagem_url = modalProjeto.imagem_url;
     if (modalImagemFile) {
       const fileExt = modalImagemFile.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 8)}.${fileExt}`;
+      const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}.${fileExt}`;
       const { error } = await supabase.storage.from('portfolio').upload(fileName, modalImagemFile);
       if (error) {
         setModalEditError('Erro ao fazer upload da nova imagem.');
@@ -409,11 +449,11 @@ export function Dashboard() {
     // Atualizar relacionamentos: remover todos e inserir os novos
     await supabase.from('projeto_linguagem').delete().eq('projeto_id', modalProjeto.id);
     await supabase.from('projeto_categoria').delete().eq('projeto_id', modalProjeto.id);
-    const linguagensIds = getIdsFromNomes(modalProjeto.linguagens, linguagensOpcoes);
+    const linguagensIds = getIdsFromNomes(modalProjeto.linguagens || [], linguagensOpcoes);
     for (const linguagem_id of linguagensIds) {
       await supabase.from('projeto_linguagem').insert({ projeto_id: modalProjeto.id, linguagem_id });
     }
-    const categoriasIds = getIdsFromNomes(modalProjeto.categorias, categoriasOpcoes);
+    const categoriasIds = getIdsFromNomes(modalProjeto.categorias || [], categoriasOpcoes);
     for (const categoria_id of categoriasIds) {
       await supabase.from('projeto_categoria').insert({ projeto_id: modalProjeto.id, categoria_id });
     }
@@ -422,6 +462,7 @@ export function Dashboard() {
     fetchProjetos();
   }
   async function removerModalProjeto() {
+    if (!modalProjeto) return;
     if (!window.confirm('Tem certeza que deseja remover este projeto?')) return;
     await handleRemoverProjeto(modalProjeto.id);
     setModalProjeto(null);
@@ -443,6 +484,7 @@ export function Dashboard() {
               <button onClick={() => setAba('portfolio')} className={`flex items-center gap-3 text-lg font-medium transition-colors ${aba === 'portfolio' ? 'text-blue-400' : 'hover:text-blue-400'}`}> <Folder className="w-5 h-5" /> Cases </button>
               <button onClick={() => setAba('estatisticas')} className={`flex items-center gap-3 text-lg font-medium transition-colors ${aba === 'estatisticas' ? 'text-blue-400' : 'hover:text-blue-400'}`}> <BarChart2 className="w-5 h-5" /> Estatísticas </button>
               <button onClick={() => setAba('tags')} className={`flex items-center gap-3 text-lg font-medium transition-colors ${aba === 'tags' ? 'text-blue-400' : 'hover:text-blue-400'}`}> <FolderOpen className="w-5 h-5" /> Tags </button>
+              <button onClick={handleLogout} className="flex items-center gap-3 text-lg font-medium text-red-500 hover:text-red-400 transition-colors mt-8"> <LogOut className="w-5 h-5" /> Sair </button>
             </nav>
           </div>
         </aside>
@@ -554,10 +596,10 @@ export function Dashboard() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {loadingProjetos ? (
                   <div className="col-span-full text-center text-gray-400">Carregando projetos...</div>
-                ) : filteredProjects.length === 0 ? (
+                ) : projetos.length === 0 ? (
                   <div className="col-span-full text-center text-gray-400">Nenhum projeto cadastrado ainda.</div>
                 ) : (
-                  filteredProjects
+                  projetos
                     .slice((paginaAtual - 1) * projetosPorPagina, paginaAtual * projetosPorPagina)
                     .map((proj) => (
                       <div key={proj.id} className="bg-black/60 rounded-2xl overflow-hidden border border-white/10 shadow-lg project-card flex flex-col">
@@ -566,6 +608,7 @@ export function Dashboard() {
                             <img
                               src={proj.imagem_url}
                               alt={proj.titulo}
+                              loading="lazy"
                               className="max-h-40 w-auto object-contain mx-auto"
                               style={{ maxWidth: '100%' }}
                             />
@@ -688,7 +731,7 @@ export function Dashboard() {
                     <div>
                       <label className="block text-gray-400 mb-1">Imagem do Projeto</label>
                       {modalProjeto.imagem_url && (
-                        <img src={modalProjeto.imagem_url} alt="Imagem atual" className="mb-2 rounded max-h-40" />
+                        <img src={modalProjeto.imagem_url} alt="Imagem atual" loading="lazy" className="mb-2 rounded max-h-40" />
                       )}
                       <input type="file" accept="image/png, image/jpeg, image/webp, image/svg+xml" onChange={e => setModalImagemFile(e.target.files?.[0] || null)} className="block w-full text-gray-300" />
                     </div>

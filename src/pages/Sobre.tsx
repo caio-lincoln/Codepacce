@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Users,
@@ -7,12 +6,14 @@ import {
   Award,
   Rocket,
   Eye,
-  Heart,
   Coffee,
   Clock,
   Zap,
-  ArrowRight
+  Heart
 } from 'lucide-react';
+import { PageBackground, PageHero, SectionHeader, CTASection } from '../components/PageLayoutComponents';
+import { FeatureCard } from '../components/ui/FeatureCard';
+import { StatCard } from '../components/ui/StatCard';
 
 export function Sobre() {
   const values = [
@@ -81,35 +82,18 @@ export function Sobre() {
 
   return (
     <div className="pt-32 pb-20 overflow-hidden">
-      {/* Background Elements */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('/noise.svg')] opacity-[0.03]" />
-        <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] -z-10" />
-      </div>
+      <PageBackground />
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 mb-32 relative z-10">
-        <div className="text-center max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-400 text-sm mb-6 backdrop-blur-sm tracking-wide">
-              Nossa História
-            </span>
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 font-display tracking-tight text-white">
-              Transformando ideias em <br />
-              <span className="text-blue-500">realidade digital</span>
-            </h1>
-            <p className="text-gray-400 text-xl font-light leading-relaxed max-w-2xl mx-auto font-sans">
-              Somos uma empresa de tecnologia dedicada a criar soluções digitais inovadoras 
-              que não apenas resolvem problemas, mas impulsionam o sucesso dos nossos clientes.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        badge="Nossa História"
+        title={
+          <>
+            Transformando ideias em <br />
+            <span className="text-blue-500">realidade digital</span>
+          </>
+        }
+        description="Somos uma empresa de tecnologia dedicada a criar soluções digitais inovadoras que não apenas resolvem problemas, mas impulsionam o sucesso dos nossos clientes."
+      />
 
       {/* Mission & Vision */}
       <section className="container mx-auto px-4 mb-32 relative z-10">
@@ -149,58 +133,28 @@ export function Sobre() {
 
       {/* Values */}
       <section className="container mx-auto px-4 mb-32 relative z-10">
-        <div className="text-center mb-16">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-4xl font-bold mb-4 font-display text-white"
-          >
-            Nossos Valores
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-gray-400 text-lg font-light max-w-2xl mx-auto"
-          >
-            Os princípios fundamentais que guiam cada decisão e linha de código
-          </motion.p>
-        </div>
+        <SectionHeader
+          title="Nossos Valores"
+          subtitle="Os princípios fundamentais que guiam cada decisão e linha de código"
+        />
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {values.map((value, index) => (
-            <motion.div 
-              key={index} 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white/[0.02] p-8 rounded-2xl backdrop-blur-sm border border-white/[0.05] hover:border-white/10 hover:bg-white/[0.04] transition-all duration-300 group text-center"
-            >
-              <div className="w-14 h-14 mx-auto rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center mb-6 text-gray-300 group-hover:text-blue-400 group-hover:border-blue-500/30 transition-all duration-300 group-hover:scale-110">
-                <value.icon className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 font-display text-white">{value.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed font-sans">{value.description}</p>
-            </motion.div>
+            <FeatureCard
+              key={index}
+              icon={value.icon}
+              title={value.title}
+              description={value.description}
+              delay={index * 0.1}
+              className="bg-white/[0.02] rounded-2xl border-white/[0.05] hover:bg-white/[0.04]"
+            />
           ))}
         </div>
       </section>
 
       {/* Timeline */}
       <section className="container mx-auto px-4 mb-32 relative z-10">
-        <div className="text-center mb-16">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-4xl font-bold mb-4 font-display text-white"
-          >
-            Nossa Jornada
-          </motion.h2>
-        </div>
+        <SectionHeader title="Nossa Jornada" />
 
         <div className="max-w-3xl mx-auto relative">
           {/* Vertical Line */}
@@ -244,52 +198,23 @@ export function Sobre() {
       <section className="container mx-auto px-4 mb-32 relative z-10">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {stats.map((stat, index) => (
-            <motion.div 
-              key={index} 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="text-center group"
-            >
-              <div className="w-12 h-12 mx-auto mb-6 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-blue-400 group-hover:bg-blue-500/10 transition-all duration-300">
-                <stat.icon className="w-5 h-5" />
-              </div>
-              <p className="text-4xl font-bold text-white mb-2 font-display tracking-tight group-hover:text-blue-400 transition-colors duration-300">{stat.value}</p>
-              <p className="text-gray-500 text-sm font-medium uppercase tracking-wider font-sans">{stat.label}</p>
-            </motion.div>
+            <StatCard
+              key={index}
+              icon={stat.icon}
+              value={stat.value}
+              label={stat.label}
+              delay={index * 0.1}
+            />
           ))}
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="relative rounded-[2.5rem] overflow-hidden border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent p-12 md:p-20 text-center group"
-        >
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[300px] bg-blue-500/10 blur-[100px] rounded-full -mt-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-          
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 font-display text-white">
-              Vamos construir algo incrível?
-            </h2>
-            <p className="text-gray-400 text-lg mb-10 font-light leading-relaxed font-sans">
-              Estamos prontos para ajudar a transformar suas ideias em realidade.
-              Entre em contato e descubra como podemos impulsionar seu negócio.
-            </p>
-            <Link 
-              to="/contato" 
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-black font-medium hover:scale-105 transition-all duration-300 group"
-            >
-              <span className="font-display">Iniciar Projeto</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-        </motion.div>
-      </section>
+      <CTASection
+        title="Vamos construir algo incrível?"
+        description="Estamos prontos para ajudar a transformar suas ideias em realidade. Entre em contato e descubra como podemos impulsionar seu negócio."
+        buttonText="Iniciar Projeto"
+        buttonLink="/contato"
+      />
     </div>
   );
 }

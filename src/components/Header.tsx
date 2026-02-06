@@ -2,27 +2,54 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, LogIn, LogOut, ArrowRight } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { User } from '@supabase/supabase-js';
 import logo from '../assets/logo-site-codepacce.png';
+import { useIsMounted } from '../hooks/useIsMounted';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const isMounted = useIsMounted();
 
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location]);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const abortController = new AbortController();
+
+    async function getSession() {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (!isMounted()) return;
+        if (error) throw error;
+        setUser(data.user);
+      } catch (error: unknown) {
+        if (!isMounted()) return;
+        // Ignorar erros de abortamento
+        if (
+          error instanceof Error && 
+          (error.name === 'AbortError' || error.message?.includes('aborted') || (error as { code?: number }).code === 20)
+        ) return;
+        console.error('Error getting user:', error);
+      }
+    }
+
+    getSession();
+
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      if (isMounted()) {
+        setUser(session?.user ?? null);
+      }
     });
+
     return () => {
+      abortController.abort();
       listener?.subscription.unsubscribe();
     };
-  }, []);
+  }, [isMounted]);
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -65,7 +92,7 @@ export function Header() {
               Serviços
               <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
             </Link>
-            <Link to="/portfolio" className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group font-display tracking-wide">
+            <Link to="/cases" className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group font-display tracking-wide">
               Cases
               <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
             </Link>
@@ -148,7 +175,7 @@ export function Header() {
             Serviços
           </Link>
           <Link 
-            to="/portfolio" 
+            to="/cases" 
             className="text-3xl font-bold hover:text-blue-500 transition-colors font-display tracking-tight"
             onClick={() => setIsMenuOpen(false)}
           >

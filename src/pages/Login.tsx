@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { Link } from 'react-router-dom';
+import { useIsMounted } from '../hooks/useIsMounted';
 
 export function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,21 +10,33 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isMounted = useIsMounted();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     const email = `${username}@gmail.com`;
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    setLoading(false);
-    if (error) {
-      setError('Usuário ou senha inválidos.');
-    } else {
-      window.location.href = '/dashboard'; // Redireciona para a página de projetos
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (!isMounted()) return;
+
+      if (error) {
+        setLoading(false);
+        setError('Usuário ou senha inválidos.');
+      } else {
+        window.location.href = '/dashboard';
+      }
+    } catch {
+      if (isMounted()) {
+        setLoading(false);
+        setError('Ocorreu um erro ao tentar entrar.');
+      }
     }
   };
 
