@@ -17,6 +17,8 @@ export function Projetos() {
   const [selectedProject, setSelectedProject] = useState<Projeto | null>(null);
   const [allProjects, setAllProjects] = useState<Projeto[]>([]);
   const [projects, setProjects] = useState<Projeto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [linguagensOpcoes, setLinguagensOpcoes] = useState<{ id: string, nome: string }[]>([]);
   const [categoriasOpcoes, setCategoriasOpcoes] = useState<{ id: string, nome: string }[]>([]);
   const [loadingGlobal, setLoadingGlobal] = useState(false);
   const [error, setError] = useState<string | null>(null);
