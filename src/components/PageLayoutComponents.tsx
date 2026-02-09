@@ -17,7 +17,6 @@ export function PageBackground({
 }: PageBackgroundProps) {
   return (
     <div className="fixed inset-0 pointer-events-none">
-      <div className={`absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[${opacity}]`} />
       <div className={`absolute top-40 left-20 w-[600px] h-[600px] ${blobColors.primary} rounded-full blur-[120px] -z-10`} />
       <div className={`absolute bottom-40 right-20 w-[600px] h-[600px] ${blobColors.secondary} rounded-full blur-[120px] -z-10`} />
     </div>

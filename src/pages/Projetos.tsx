@@ -107,9 +107,9 @@ export function Projetos() {
 
       <PageHero
         title={
-          <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
-            Nossos Projetos
-          </span>
+          <>
+            Nossos <span className="text-blue-500">Projetos</span>
+          </>
         }
         description="Conheça algumas das soluções que desenvolvemos para transformar a realidade de nossos clientes."
       />

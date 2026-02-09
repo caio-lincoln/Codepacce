@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageBackground } from '../components/PageLayoutComponents';
 import { HomeHero } from '../components/home/HomeHero';
 import { HomeStats } from '../components/home/HomeStats';
 import { HomeServices } from '../components/home/HomeServices';
@@ -10,6 +11,7 @@ import { HomeCTA } from '../components/home/HomeCTA';
 export function Home() {
   return (
     <>
+      <PageBackground />
       <HomeHero />
       <HomeStats />
       <HomeProcess />
